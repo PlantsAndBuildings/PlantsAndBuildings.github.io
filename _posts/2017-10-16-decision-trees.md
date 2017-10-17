@@ -2,7 +2,7 @@
 layout: post
 title: Decision Trees
 published: true
-categories: [machine learning]
+categories: [machine-learning]
 ---
 
 #### What are decision trees?
