@@ -7,12 +7,12 @@ categories: [machine-learning]
 
 #### What are decision trees?
 
-It will be beneficial to discuss decision trees with respect to a real-life example. The runnign example in this blog post will be that of the [Titanic Challenge](https://www.kaggle.com/c/titanic) from the popular website [Kaggle](https://www.kaggle.com). Basically, we're given a whole bunch of information about the passengers on board the famous Titanic - stuff like name, age, sex, number of children/spouse they were travelling with. And most importantly, we are given (for each of the passengers) whether they survived Titanic's sinking or not. We are then asked, given the same characteristics of some random passenger, to predict whether said passenger is likely to have survived the shipwreck or not. Capiche? The reader can familiarize himself with the challenge and the data [here](https://www.kaggle.com/c/titanic) - because it is just too much work for me to repeat it all in this blog post.
+It will be beneficial to discuss decision trees with respect to a real-life example. The running example in this blog post will be that of the [Titanic Challenge](https://www.kaggle.com/c/titanic) from the popular website [Kaggle](https://www.kaggle.com). Basically, we're given a whole bunch of information about the passengers on board the famous Titanic - stuff like name, age, sex, number of children/spouse they were travelling with. And most importantly, we are given (for each of the passengers) whether they survived Titanic's sinking or not. We are then asked, given the same characteristics of some random passenger, to predict whether said passenger is likely to have survived the shipwreck or not. Capiche? The reader can familiarize himself with the challenge and the data [here](https://www.kaggle.com/c/titanic).
 
-Now that we have given an overview of the problem that we will attempt to solve, let us understant our strategy (atleast for this blog post) to attack the problem - decision trees. Decision trees are fairly straightforward things to understand:
+Now that we have given an overview of the problem that we will attempt to solve, let us understand our strategy (atleast for this blog post) to attack it - decision trees. Decision trees are fairly straightforward things to understand:
 
 - Each leaf node represents a decision or a classification.
-- Each internal node represents a attribute or feature to be tested.
+- Each internal node represents an attribute or feature to be tested.
 - Based on the feature to be tested, there are branches descending from each internal node.
 
 The following figure (taken from [here](https://medium.com/towards-data-science/decision-trees-in-machine-learning-641b9c4e8052)) represents one possible decision tree which uses three features/attributes (namely sex, age and sibsp) to predict the survival classification (Ie. died or survived).
@@ -26,9 +26,9 @@ It is not too hard to see how we perform classification from this tree. We simpl
 First, let us understand what is meant by growing an optimal decision tree to fit some given training data. We have already seen that a decision tree contains, as internal nodes, features which split data into "buckets". Consider now, all possible permutations of these internal nodes - that is, try and imagine all possible trees that we can construct (by choosing different features at root, children of root and so on). It should intuitively be clear that the number of such decision trees is large - and grows exponentially with the number of features. Of all such possible decision trees (if at all we are able to enumerate all of them), if we select the one that has the highest classification accuracy on the traianing data - then that decision tree is optimal for the given training data. At this point we make two statements:
 
 - The task of finding an optimal decision tree to fit some given training data is NP complete. I say this without proof - trust me.
-- There is absolutely no guarantee that the optimal decision tree for some given training data will generalize the best. Ie. there are no gurantees that it will perform best on unseen data (because unseen data is, well, unseen). However, we can expect it to perform better than most a randomly formed decision tree.
+- There is absolutely no guarantee that the optimal decision tree for some given training data will generalize the best. Ie. there are no gurantees that it will perform best on unseen data (because unseen data is, well, unseen). However, we can expect it to perform better than most randomly formed decision trees.
 
-The above two statements motivate our decision tree learning algorithm. What follows is a very general description of an algorithm to learn decision trees, and most popular algorithms (CART, ID3, C4.5 etc) are ust slight variations of the following steps:
+The above two statements motivate our decision tree learning algorithm. What follows is a very general description of an algorithm to learn decision trees, and most popular algorithms (CART, ID3, C4.5 etc) are just slight variations of the following steps:
 
 1. We start from the top (Ie. the root). We must first decide the attribute to be tested at the root of the decision tree. How do we select this attribute? This is where different learning algorithms differ from one another. In ID3 we compute the **information gain** obtained by using each attribute to split the data. The attribute that provides the highest information gain is selected for the root.
 2. Now we move down - to the children of the root. Here too, we use information gain to select the "best" attribute to split the data. Note that here, we do not consider the attributes that have already been assigned to a higher node. This ensures termination of the algorithm. We terminate when there are no more attributes left to split on **OR** when we reach a state where all the training examples at the current node belong to the same class.
@@ -65,7 +65,7 @@ import graphviz
 import subprocess
 ```
 
-I define a global boolean that allwos me to switch between local testing mode and final submission mode. When I'm testing locally, I want to learn the decision tree on ```local_train.csv``` and compute the classification acccuracy on ```local_test.csv```. In the final submission mode, I want to train on the entire ```train.csv```, and generate an output csv file as per the requirements of the challenge.
+I define a global boolean that allows me to switch between local testing mode and final submission mode. When I'm testing locally, I want to learn the decision tree on ```local_train.csv``` and compute the classification acccuracy on ```local_test.csv```. In the final submission mode, I want to train on the entire ```train.csv```, and generate an output csv file, using ```test.csv```, as per the requirements of the challenge.
 
 ``` python
 LOCAL_TESTING = True
@@ -89,7 +89,7 @@ features_to_consider = ['Sex','Pclass','Age','SibSp','Parch','Fare','Embarked']
 
 The following method, reads a csv file - path to which is specified as the ```filename``` argument. It also performs some cleaning up:
 
-- It fills in missing values in the dataset. This procedure should be afforded closer scrutiny - and some statistics would go a long way. For now, I have just put in imputed values that seemed reasonable to me. This should have an effect on the accuracy of the model.
+- It fills in missing values in the dataset. This procedure should be afforded closer scrutiny - and some statistics would go a long way. For now, I have just imputed values that seemed reasonable to me. This should have an effect on the accuracy of the model.
 - It also converts string values in the data to numeric data. This is required by the ```DecisionTreeClassifier``` of scikit-learn. I have just assigned an integer to each distinct value of a string type attribute. An alternate is using a one-hot encoding scheme (maybe that performs better, I dont know).
 
 Finally, this method checks if the given file is a training file or a test file (depending on whether the data contains the ```Survived``` column or not). If it does, then the method returns a list of two Pandas ```DataFrames``` - namely, one containing the data points (```X```) and the other containing corresponding classes (```y```). If the ```Survived``` column is absent (that is, we are looking to create the final output file and submit) - then only ```X``` is creatd and returned.
@@ -133,7 +133,7 @@ else:
 
 Now, we get the DecisionTreeClassifier object and fit it to our training data. We have specified some keyword arguments while creating the decision tree object. It is important that we understand what each of these is responsible for.
 
-- ```criterion```. This keyword argument specifies the criterion used for splitting nodes of the decision tree. Here we have set it to ```entrpy```. BY default, it uses the ```gini```.
+- ```criterion```. This keyword argument specifies the criterion used for splitting nodes of the decision tree. Here we have set it to ```entropy```. By default, it uses the ```gini``` criterion.
 - ```splitter```. Now that we have specified the criterion used to evaluate splits, we need to specify a strategy used to split the nodes. Supported strategies are ```best``` and ```random```.
 - ```max_depth```. Specifies the maximum depth of the decision tree. This parameter affects the accuracy a LOT.
 - ```min_samples_leaf``` and ```min_samples_split```. These parameters are used to prevent overfitting of the decision tree. If the leaf nodes contain only one sample each - then it is unlikely that the model will generalize well to unseen data. Here we have set the minimum number of samples in a leaf to be 5. This parameter should also be varied and checked for best performance.
