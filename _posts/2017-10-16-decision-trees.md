@@ -23,7 +23,7 @@ It is not too hard to see how we perform classification from this tree. We simpl
 
 #### How to grow decision trees?
 
-First, let us understand what is meant by growing an optimal decision tree to fit some given training data. We have already seen that a decision tree contains, as internal nodes, features which split data into "buckets". Consider now, all possible permutations of these internal nodes - that is, try and imagine all possible trees that we can construct (by choosing different features at root, children of root and so on). It should intuitively be clear that the number of such decision trees is large - and grows exponentially with the number of features. Of all such possible decision trees (if at all we are able to enumerate all of them), if we select the one that has the highest classification accuracy on the traianing data - then that decision tree is optimal for the given training data. At this point we make two statements:
+First, let us understand what is meant by growing an optimal decision tree to fit some given training data. We have already seen that a decision tree contains, as internal nodes, features which split data into "buckets". Consider now, all possible permutations of these internal nodes - that is, try and imagine all possible trees that we can construct (by choosing different features at root, children of root and so on). It should intuitively be clear that the number of such decision trees is large - and grows exponentially with the number of features. Of all such possible decision trees (if at all we are able to enumerate all of them), if we select the one that has the highest classification accuracy on the training data - then that decision tree is optimal for the given training data. At this point we make two statements:
 
 - The task of finding an optimal decision tree to fit some given training data is NP complete. I say this without proof - trust me.
 - There is absolutely no guarantee that the optimal decision tree for some given training data will generalize the best. Ie. there are no gurantees that it will perform best on unseen data (because unseen data is, well, unseen). However, we can expect it to perform better than most randomly formed decision trees.
@@ -89,10 +89,10 @@ features_to_consider = ['Sex','Pclass','Age','SibSp','Parch','Fare','Embarked']
 
 The following method, reads a csv file - path to which is specified as the ```filename``` argument. It also performs some cleaning up:
 
-- It fills in missing values in the dataset. This procedure should be afforded closer scrutiny - and some statistics would go a long way. For now, I have just imputed values that seemed reasonable to me. This should have an effect on the accuracy of the model.
+- It fills in missing values in the dataset. This procedure should be afforded closer scrutiny - and some statistics would go a long way. For now, I have just put in values that seemed reasonable to me. This should have an effect on the accuracy of the model.
 - It also converts string values in the data to numeric data. This is required by the ```DecisionTreeClassifier``` of scikit-learn. I have just assigned an integer to each distinct value of a string type attribute. An alternate is using a one-hot encoding scheme (maybe that performs better, I dont know).
 
-Finally, this method checks if the given file is a training file or a test file (depending on whether the data contains the ```Survived``` column or not). If it does, then the method returns a list of two Pandas ```DataFrames``` - namely, one containing the data points (```X```) and the other containing corresponding classes (```y```). If the ```Survived``` column is absent (that is, we are looking to create the final output file and submit) - then only ```X``` is creatd and returned.
+Finally, this method checks if the given file is a training file or a test file (depending on whether the data contains the ```Survived``` column or not). If it does, then the method returns a list of two Pandas ```DataFrames``` - namely, one containing the data points (```X```) and the other containing corresponding classes (```y```). If the ```Survived``` column is absent (that is, we are looking to create the final output file and submit) - then only ```X``` is created and returned.
 
 ``` python
 def get_dataset(filename):
@@ -131,7 +131,7 @@ else:
 	X,y = get_dataset('dataset/train.csv')
 ```
 
-Now, we get the DecisionTreeClassifier object and fit it to our training data. We have specified some keyword arguments while creating the decision tree object. It is important that we understand what each of these is responsible for.
+Now, we get the ```DecisionTreeClassifier``` object and fit it to our training data. We have specified some keyword arguments while creating the decision tree object. It is important that we understand what each of these is responsible for.
 
 - ```criterion```. This keyword argument specifies the criterion used for splitting nodes of the decision tree. Here we have set it to ```entropy```. By default, it uses the ```gini``` criterion.
 - ```splitter```. Now that we have specified the criterion used to evaluate splits, we need to specify a strategy used to split the nodes. Supported strategies are ```best``` and ```random```.
@@ -173,7 +173,7 @@ else:
 			out_writer.writerow([passenger_id,prediction])
 ```
 
-We make a short note of the method used to visualize the decision tree. The ```sklearn.tree``` module contains an ```export_graphviz``` method that exports an ```DecisionTreeClassifier``` as a dot file. This dot file, can be conterted to either a postscript or PNG format using the ```dot``` utility. This is precisely what ```visualize_tree``` achieves.
+We make a short note of the method used to visualize the decision tree. The ```sklearn.tree``` module contains an ```export_graphviz``` method that exports a ```DecisionTreeClassifier``` object as a dot file. This dot file, can be converted to either a postscript or PNG format using the ```dot``` utility. This is precisely what ```visualize_tree``` achieves.
 
 ``` python
 def visualize_tree(clf):
@@ -188,7 +188,7 @@ And finally, here what our decision tree looks like.
 
 <img src="{{ site.url }}/static/img/titanic-decision-tree-graphviz.png"/>
 
-The complete code, dataset and visualization can be found on [my github](#). This code, as is, achieves a 0.78 accuracy on Kaggle - which is decent, but there is a lot of scope for improvement. Right now this code only performs a minimal amount of feature engineering; doesnt add any new features and has not been tested for all possible values of parameters like ```max_depth```, ```min_samples_split``` etc.
+The complete code, dataset and visualization can be found on [my github](#). This code, as is, achieves a 0.78 accuracy on Kaggle - which is decent, but there is a lot of scope for improvement. Right now this code only performs a minimal amount of feature engineering; doesn't add any new features and has not been tested for all possible values of parameters like ```max_depth```, ```min_samples_split``` etc.
 
 Thats all.
 
