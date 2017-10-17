@@ -1,6 +1,6 @@
 ---
 layout: posts_by_category
-categories: absract algebra
+categories: abstract algebra
 title: Abstract Algebra
 permalink: /category/abstract-algebra
 ---
