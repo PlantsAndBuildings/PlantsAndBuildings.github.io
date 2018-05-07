@@ -111,7 +111,8 @@ void Forward(arma::cube&amp; input, arma::cube&amp; output)
 
 
 
-<pre class="language-cpp"><code>void Backward(arma::cube&amp; upstreamGradient)                                                                                                                                                                                                                                       {
+``` c++
+void Backward(arma::cube&amp; upstreamGradient)                                                                                                                                                                                                                                       {
   // Upstream gradient must have same dimensions as the output.
   assert(upstreamGradient.n_slices == numFilters);
   assert(upstreamGradient.n_rows == output.n_rows);
@@ -172,7 +173,8 @@ void Forward(arma::cube&amp; input, arma::cube&amp; output)
   // Update the accumulated gradient wrt filters.
   for (size_t fidx=0; fidx&lt;numFilters; fidx++)
     accumulatedGradFilters[fidx] += gradFilters[fidx];
-}</code></pre>
+}
+```
 <h3>3. A Note on Gradient Checking</h3>
 <p style="text-align: justify;">With the convolution layer implementation out of the way, the remaining layers were relatively easy to implement. Maybe the max-pooling layer was a bit tricky - like the convolution layer, it also has the deceptive sliding-window operation. However, with the understanding gleaned from the convolution layer backward pass implementation - this did not pose too much of a hurdle. As I had decided at the very beginning of the project, I was going to test every single layer immediately after I'd written it. Although I didn't write unit tests very extensively, I did write enough of them to make sure that the layers worked correctly for my purposes (Ie. that of solving the digit recognizer challenge).</p>
 <p style="text-align: justify;">The forward pass through any layer is easily checked. First, we manually compute the forward pass through a layer for some hand-crafted input, and then compare it with the output we get from the layer's forward pass code. Checking the backward pass is not that straightforward. The output of a backward pass through a layer is the gradient of loss with respect to the layer inputs. One commonly used technique is called <strong>gradient checking.</strong> See, the backward pass code essentially contains the formula for the analytic gradient. <strong>In a gradient check, we simply compare the gradient computed by the analytic formula and one computed by making small changes in the input (finite difference method). If the two agree to a certain tolerance limit, then we can be fairly sure that our implementation is correct.</strong> I'd used gradient check to check my convolution layer implementation - and for other layers as well.</p>
