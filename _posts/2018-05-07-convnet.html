@@ -107,3 +107,72 @@ MathJax.Hub.Config({
 <p style="text-align: justify;">$$ \nabla_x L = \sum_{i = 1}^{6}{(\text{affect of input values on the activation } y_i)(\text{affect } y_i \text{ has on } L)}$$</p>
 <p style="text-align: justify;">Okay, with that verbose explanation in place, I present my <strong>convolution layer backward pass</strong>:</p>
 
+
+
+<pre class="language-cpp"><code>void Backward(arma::cube&amp; upstreamGradient)                                                                                                                                                                                                                                       {
+  // Upstream gradient must have same dimensions as the output.
+  assert(upstreamGradient.n_slices == numFilters);
+  assert(upstreamGradient.n_rows == output.n_rows);
+  assert(upstreamGradient.n_cols == output.n_cols);
+
+  // Initialize gradient wrt input. Note that the dimensions are same as those
+  // of the input.
+  gradInput = arma::zeros(arma::size(input));
+
+  // Compute the gradient wrt input.
+  for (size_t sidx=0; sidx &lt; numFilters; sidx++)
+  {
+    for (size_t r=0; r&lt;output.n_rows; r ++)
+    {
+      for (size_t c=0; c&lt;output.n_cols; c ++)
+      {
+        arma::cube tmp(arma::size(input), arma::fill::zeros);
+        tmp.subcube(r*verticalStride,
+                    c*horizontalStride,
+                    0,
+                    (r*verticalStride)+filterHeight-1,
+                    (c*horizontalStride)+filterWidth-1,
+                    inputDepth-1)
+            = filters[sidx];
+        gradInput += upstreamGradient.slice(sidx)(r, c) * tmp;
+      }
+    }
+  }
+
+  // Update the accumulated gradient wrt input.
+  accumulatedGradInput += gradInput;
+
+  // Initialize the gradient wrt filters.
+  gradFilters.clear();
+  gradFilters.resize(numFilters);
+  for (size_t i=0; i&lt;numFilters; i++)
+    gradFilters[i] = arma::zeros(filterHeight, filterWidth, inputDepth);
+
+  // Compute the gradient wrt filters.
+  for (size_t fidx=0; fidx&lt;numFilters; fidx++)
+  {
+    for (size_t r=0; r&lt;output.n_rows; r ++)
+    {
+      for (size_t c=0; c&lt;output.n_cols; c ++)
+      {
+        arma::cube tmp(arma::size(filters[fidx]), arma::fill::zeros);
+        tmp = input.subcube(r*verticalStride,
+                            c*horizontalStride,
+                            0,
+                            (r*verticalStride)+filterHeight-1,
+                            (c*horizontalStride)+filterWidth-1,
+                            inputDepth-1);
+        gradFilters[fidx] += upstreamGradient.slice(fidx)(r, c) * tmp;
+      }
+    }
+  }
+
+  // Update the accumulated gradient wrt filters.
+  for (size_t fidx=0; fidx&lt;numFilters; fidx++)
+    accumulatedGradFilters[fidx] += gradFilters[fidx];
+}</code></pre>
+<h3>3. A Note on Gradient Checking</h3>
+<p style="text-align: justify;">With the convolution layer implementation out of the way, the remaining layers were relatively easy to implement. Maybe the max-pooling layer was a bit tricky - like the convolution layer, it also has the deceptive sliding-window operation. However, with the understanding gleaned from the convolution layer backward pass implementation - this did not pose too much of a hurdle. As I had decided at the very beginning of the project, I was going to test every single layer immediately after I'd written it. Although I didn't write unit tests very extensively, I did write enough of them to make sure that the layers worked correctly for my purposes (Ie. that of solving the digit recognizer challenge).</p>
+<p style="text-align: justify;">The forward pass through any layer is easily checked. First, we manually compute the forward pass through a layer for some hand-crafted input, and then compare it with the output we get from the layer's forward pass code. Checking the backward pass is not that straightforward. The output of a backward pass through a layer is the gradient of loss with respect to the layer inputs. One commonly used technique is called <strong>gradient checking.</strong> See, the backward pass code essentially contains the formula for the analytic gradient. <strong>In a gradient check, we simply compare the gradient computed by the analytic formula and one computed by making small changes in the input (finite difference method). If the two agree to a certain tolerance limit, then we can be fairly sure that our implementation is correct.</strong> I'd used gradient check to check my convolution layer implementation - and for other layers as well.</p>
+<p style="text-align: justify;">Here is an example of gradient checking from a test I wrote for the convolution layer backward pass:</p>
+
