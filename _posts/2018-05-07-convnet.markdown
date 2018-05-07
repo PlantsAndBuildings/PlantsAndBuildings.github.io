@@ -34,7 +34,8 @@ MathJax.Hub.Config({
 <h3 style="text-align: justify;">2. Forward and Backward</h3>
 <p style="text-align: justify;">I started right in the middle of everything - the convolution layer was the first thing I wanted to do. After a quick constructor implementation, I came to the Forward and Backward passes. The Forward pass was pretty straight-"forward"... See what I did there? <strong>There are several excellent explanations <a href="https://www.youtube.com/watch?v=bNb2fEVKeEo&amp;t=0s&amp;list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&amp;index=5">(one can be found here)</a> of the forward pass, and TBH it's not that tough to understand, so I won't go into it here.</strong> I'll just paste my code:</p>
 
-<pre class="language-cpp"><code>void Forward(arma::cube&amp; input, arma::cube&amp; output)
+``` c++
+void Forward(arma::cube&amp; input, arma::cube&amp; output)
 {
   // The filter dimensions and strides must satisfy some contraints for
   // the convolution operation to be well defined.
@@ -62,7 +63,8 @@ MathJax.Hub.Config({
   // Store the input and output. This will be needed by the backward pass.
   this-&gt;input = input;
   this-&gt;output = output;
-}</code></pre>
+}
+```
 
 
 <p style="text-align: justify;">The backward pass needed some effort. The reason for that requires a slight digression:</p>
