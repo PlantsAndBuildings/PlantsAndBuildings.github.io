@@ -264,3 +264,197 @@ MathJax.Hub.Config({
 <p style="text-align: justify;">Six days into working on the groundup implementation, I had implemented and tested all my layers - and was quite happy with my progress. I'd even written a small integration test where I trained a network on a synthetic dataset. Everything was good. I decided to make things prettier before I started on LeNet, so I made a bunch of style fixes, refactored everything and even wrote a CMake configuration. I also wrote a utility module for reading the challenge data into Armadillo data structures.</p>
 <p style="text-align: justify;">I wrote the Le Net implementation and tested it on a very small dataset. It seemed to work in one go, and so I thought that since everything is working fine, and since Le Net is such a popular neural network architecture, I might as well go ahead and train it on the entire challenge data. <strong>In retrospect, I made the following critical errors:</strong></p>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<ol style="text-align: justify;">
+<li><strong>I was always only looking at the loss values after each epoch.</strong></li>
+<li><strong>I jumped on to full dataset training too soon.</strong></li>
+</ol>
+<p style="text-align: justify;">The first error was perhaps the one that wasted more of my time. See, I was looking at only the loss values when in fact <strong>the metric that I really wanted to optimize for was accuracy.</strong> <strong>Classification error rate is not a smooth function, and hence we use a surrogate loss, right? But, we don't really care about the decrease in surrogate loss. We care about the decrease in classification error!!</strong> What happened to me was that the  cross entropy loss always decreased to 2.3 and stopped. I thought that - oh well, this is what the network is converging to and it must be correct. Later on, when I looked closely at the predictions my network was making, I found that this loss corresponds to all output probabilities being the same:</p>
+<p style="text-align: justify;">$$ -10 \log(0.1) \approx 2.3 $$</p>
+<h3 style="text-align: justify;">5. Le Net ... again</h3>
+<p style="text-align: justify;">Eight days into the groundup implementation, I'd started to lose my shit. My Le Net would just not work. No matter what I did, the accuracy would not budge. I soon reached a stage where I'd fucked things up so much that all metrics showed a decreasing trend - even the accuracies! I had already painstakingly checked all outputs of each layer by hand. Everything looked correct except for one thing: the outputs of the dense layer were of the order of $ 10^2 $. Clearly this was too high for softmax to give meaningful output - what I mean by that is that the softmax output was very close to a one-hot vector. This was causing numerical instability issues in the subsequent cross entropy loss layer (NaNs and infs popping up everywhere). However, scaling the dense layer output also did not help much - the network was still showing equal probabilities for all output classes.</p>
+<p style="text-align: justify;">A good two days were wasted on trying to fix the Le Net - to no avail. In exasperation, I decided to reset the project to a checkpoint where things looked better. I wiped my working directory of all Le Net changes and resolved to give it one - just one - more try. If it still did not work, I would delete the project and never think of it as long as I live. I then wrote the <strong>three integration tests that saved this project</strong> from digital abyss:</p>
+<ol style="text-align: justify;">
+<li><strong>I wrote a simple Multi-Layer Perceptron that learned the AND decision boundary.</strong> This test pointed out two errors in my dense layer implementations. First, that I'd forgotten to incorporate the upstream gradient into the weight update for the dense layer weights. Second, that I'd forgotten to add the biases. I was quick to correct these defects.</li>
+<li><strong>Next, I wrote a test to train a simple network to correctly recognize just one handwritten digit.</strong> The network included all components of a Le Net - and had a (conv - ReLU - max pool - dense - softmax - cross entropy) schema.</li>
+<li><strong>Finally, I trained the above network on the medium sized dataset I'd sampled from the complete data.</strong></li>
+</ol>
+<p style="text-align: justify;"> The results of the third test (presented below) gave me some hope:</p>
+<pre class="language-markup"><code> [DEBUG INTEGRATION TEST ]   Size of training set: 2700
+ [DEBUG INTEGRATION TEST ]   Size of validation set: 300
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 2.22893
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.406667
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 1.33203
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.676667
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 0.841367
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.753333
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 0.584995
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.79
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 0.44068
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.813333
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 0.360519
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.81
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 0.294253
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.84
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 0.265645
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.83
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 0.220504
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.863333
+ [DEBUG INTEGRATION TEST ]
+ [DEBUG INTEGRATION TEST ]   Average loss: 0.164675
+ [DEBUG INTEGRATION TEST ]   Validation Accuracy: 0.863333</code></pre>
+<p style="text-align: justify;">I then proceeded with the Le Net implementation again. The only thing I corrected from the previous implementation was that I scaled the dense layer outputs this time round. I ran Le Net on the medium sized dataset and got the following results:</p>
+<pre class="language-markup"><code> [DEBUG LE NET ] Training data size: 2700
+ [DEBUG LE NET ] Validation data size: 300
+ [DEBUG LE NET ] Test data size: 10
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #0: 0.578797
+ [DEBUG LE NET ] Val accuracy: 0.886667
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #1: 0.181674
+ [DEBUG LE NET ] Val accuracy: 0.936667
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #2: 0.155978
+ [DEBUG LE NET ] Val accuracy: 0.913333
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #3: 0.0978818
+ [DEBUG LE NET ] Val accuracy: 0.956667
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #4: 0.0800541
+ [DEBUG LE NET ] Val accuracy: 0.953333
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #5: 0.0567186
+ [DEBUG LE NET ] Val accuracy: 0.936667
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #6: 0.0514032
+ [DEBUG LE NET ] Val accuracy: 0.916667
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #7: 0.0396252
+ [DEBUG LE NET ] Val accuracy: 0.926667
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #8: 0.0444968
+ [DEBUG LE NET ] Val accuracy: 0.933333
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Loss after epoch #9: 0.0350243
+ [DEBUG LE NET ] Val accuracy: 0.93</code></pre>
+<p style="text-align: justify;">I was really happy with this, and would've been content with similar results on the complete data. I mean, 93% is not a great score - considering that Keras gives &gt; 98% out of the box, but I suppose it's okay for a naive implementation. Honestly, I could never have imagined that the network would give the results it did on the complete dataset:</p>
+<pre class="language-markup"><code> [DEBUG LE NET ] Training data size: 37800                                                                                                                                                                                                                                         
+ [DEBUG LE NET ] Validation data size: 4200
+ [DEBUG LE NET ] Test data size: 28000
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 0
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.189032
+ [DEBUG LE NET ] Training accuracy: 0.971772
+ [DEBUG LE NET ] Validation loss: 0.01326
+ [DEBUG LE NET ] Val accuracy: 0.960952
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 1
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.102551
+ [DEBUG LE NET ] Training accuracy: 0.975688
+ [DEBUG LE NET ] Validation loss: 0.0108781
+ [DEBUG LE NET ] Val accuracy: 0.966905
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 2
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.0846397
+ [DEBUG LE NET ] Training accuracy: 0.981587
+ [DEBUG LE NET ] Validation loss: 0.010056
+ [DEBUG LE NET ] Val accuracy: 0.971905
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 3
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.0762915
+ [DEBUG LE NET ] Training accuracy: 0.978201
+ [DEBUG LE NET ] Validation loss: 0.012528
+ [DEBUG LE NET ] Val accuracy: 0.97119
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 4
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.0741992
+ [DEBUG LE NET ] Training accuracy: 0.984365
+ [DEBUG LE NET ] Validation loss: 0.0108226
+ [DEBUG LE NET ] Val accuracy: 0.975714
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 5
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.0775739
+ [DEBUG LE NET ] Training accuracy: 0.981958
+ [DEBUG LE NET ] Validation loss: 0.0113603
+ [DEBUG LE NET ] Val accuracy: 0.972619
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 6
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.0787951
+ [DEBUG LE NET ] Training accuracy: 0.976746
+ [DEBUG LE NET ] Validation loss: 0.0171829
+ [DEBUG LE NET ] Val accuracy: 0.969524
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 7
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.0779284
+ [DEBUG LE NET ] Training accuracy: 0.982989
+ [DEBUG LE NET ] Validation loss: 0.0105239
+ [DEBUG LE NET ] Val accuracy: 0.974762
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 8
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.0777354
+ [DEBUG LE NET ] Training accuracy: 0.985132
+ [DEBUG LE NET ] Validation loss: 0.0103395
+ [DEBUG LE NET ] Val accuracy: 0.97619
+ [DEBUG LE NET ]
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Epoch # 9
+ [DEBUG LE NET ]
+ [DEBUG LE NET ] Training loss: 0.0684171
+ [DEBUG LE NET ] Training accuracy: 0.986085
+ [DEBUG LE NET ] Validation loss: 0.0103472
+ [DEBUG LE NET ] Val accuracy: 0.975238
+ [DEBUG LE NET ]</code></pre>
+<p style="text-align: justify;"><strong>WTF!!! A consistent 97% validation accuracy! I submitted the result after 8 epochs, and it scored 0.973 on the Kaggle leaderboard. As of today, this submission ranks 1412</strong> - pretty good for a ground up implementation, if you ask me.</p>
