@@ -4,9 +4,53 @@ layout: post
 categories: [misc]
 published: true
 ---
+<h3>0. A convnet, you say? In C++?! FROM SCRATCH??!!</h3>
+<p style="text-align: justify;">About a week ago, I was at work with absolutely nothing to do - even the office pool table was (is still) broken. If you subscribe to the creationist agenda, you might refer to what happened next as a divine calling. Being a Darwinist myself, I attribute it to mind numbing boredom crippling all rational thought processes. See, over the course of last week, I implemented a machine learning model - one that is notoriously hard to debug when things do not work - in, what perhaps is, the most unforgiving programming language known to man.</p>
+<p style="text-align: justify;"><strong>On 18<sup>th</sup> April 2018, I decided to implement a convolutional neural network</strong></p>
+<p style="text-align: justify;"><strong>... from scratch</strong></p>
+<p style="text-align: justify;"><strong>... in C++</strong></p>
+<p style="text-align: justify;">Maybe I thought that it would be a nice way to kill time; maybe I severely (<strong>SEVERELY</strong>) underestimated the magnitude of complexity involved; or maybe .. just maybe, I thought that it might lead to some sort of cosmic enlightenment about the nature of deep learning models (mysterious creatures that they are). As misguided as the foundations of my enterprise may have been, last night my efforts finally came to fruition when <strong>the</strong> <strong>Le Net I implemented scored 0.973 on the <a href="https://www.kaggle.com/c/digit-recognizer">Kaggle Digit Recognizer Challenge</a> leaderboard</strong>. What follows is an account of tears shed in the process.</p>
+<p style="text-align: justify;"><strong>The end result can be found <a href="https://github.com/PlantsAndBuildings/cpp-cnn">on my Github</a></strong>. I do plan to add a useful README and instructions for building and running the network soon. In this post, I plan to focus on the aspects I found interesting and challenging about the process - the code on Github contains all the remaining missing parts.</p>
+<h3 style="text-align: justify;">1. Which ones do I use?</h3>
+<p style="text-align: justify">Right off the bat, I made some decisions about the tools I would use for the implementation:</p>
+<p style="text-align: justify">1. I'd already decided that the <strong>implementation would be in C++</strong></p>
+<p style="text-align: justify">2. I knew that I needed linear algebra utilities - and I knew of two libraries which could provide that for me: <strong><a href="http://arma.sourceforge.net/">Armadillo</a></strong> and <strong><a href="http://eigen.tuxfamily.org">Eigen</a></strong>. I'd had some experience with both, more with Eigen than Armadillo, but I would have had to install Eigen on my system - and I couldn't be bothered to do that. <strong>Hence, Armadillo.</strong></p>
+<p style="text-align: justify">3. I decided (and I still pat myself on the back for this decision) to properly test the code as I was writing it. I decided to use the <strong><a href="https://www.boost.org/doc/libs/1_53_0/libs/test/doc/html/utf.html">Boost Test Framework</a></strong> to write unit tests.</p>
+<p style="text-align: justify">A few days into the project I also decided to use the <strong><a href="https://cmake.org/">CMake</a></strong> build system to easily build and run my code.</p>
+<h3 style="text-align: justify;">2. Forward and Backward</h3>
+<p style="text-align: justify;">I started right in the middle of everything - the convolution layer was the first thing I wanted to do. After a quick constructor implementation, I came to the Forward and Backward passes. The Forward pass was pretty straight-"forward"... See what I did there? <strong>There are several excellent explanations <a href="https://www.youtube.com/watch?v=bNb2fEVKeEo&amp;t=0s&amp;list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&amp;index=5">(one can be found here)</a> of the forward pass, and TBH it's not that tough to understand, so I won't go into it here.</strong> I'll just paste my code:</p>
 
-Hello
+``` c++
+void Forward(arma::cube& input, arma::cube& output)
+{
+  // The filter dimensions and strides must satisfy some contraints for
+  // the convolution operation to be well defined.
+  assert((inputHeight - filterHeight)%verticalStride == 0);
+  assert((inputWidth - filterWidth)%horizontalStride == 0);
 
+  // Output initialization.
+  output = arma::zeros((inputHeight - filterHeight)/verticalStride + 1,
+                       (inputWidth - filterWidth)/horizontalStride + 1,
+                       numFilters);
+
+  // Perform convolution for each filter.
+  for (size_t fidx = 0; fidx < numFilters; fidx++)
+  {
+    for (size_t i=0; i <= inputHeight - filterHeight; i += verticalStride)
+      for (size_t j=0; j <= inputWidth - filterWidth; j += horizontalStride)
+        output((i/verticalStride), (j/horizontalStride), fidx) = arma::dot(
+            arma::vectorise(
+                input.subcube(i, j, 0,
+                              i+filterHeight-1, j+filterWidth-1, inputDepth-1)
+              ),
+            arma::vectorise(filters[fidx]));
+  }
+  
+  // Store the input and output. This will be needed by the backward pass.
+  this->input = input;
+  this->output = output;
+}
+```
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
