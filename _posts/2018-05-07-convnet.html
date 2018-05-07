@@ -176,3 +176,91 @@ MathJax.Hub.Config({
 <p style="text-align: justify;">The forward pass through any layer is easily checked. First, we manually compute the forward pass through a layer for some hand-crafted input, and then compare it with the output we get from the layer's forward pass code. Checking the backward pass is not that straightforward. The output of a backward pass through a layer is the gradient of loss with respect to the layer inputs. One commonly used technique is called <strong>gradient checking.</strong> See, the backward pass code essentially contains the formula for the analytic gradient. <strong>In a gradient check, we simply compare the gradient computed by the analytic formula and one computed by making small changes in the input (finite difference method). If the two agree to a certain tolerance limit, then we can be fairly sure that our implementation is correct.</strong> I'd used gradient check to check my convolution layer implementation - and for other layers as well.</p>
 <p style="text-align: justify;">Here is an example of gradient checking from a test I wrote for the convolution layer backward pass:</p>
 
+
+
+
+<pre class="language-cpp"><code>BOOST_AUTO_TEST_CASE(BackwardPassBigTest)
+{
+  // Input is 7 rows, 11 cols, and 3 slices.
+  arma::cube input(7, 11, 3, arma::fill::randn);
+
+  ConvolutionLayer c(
+      7,  // Input height.
+      11,  // Input width.
+      3,  // Input depth.
+      3,  // Filter height.
+      5,  // Filter width.
+      2,  // Horizontal stride.
+      2,  // Vertical stride.
+      2); // Number of filters.
+
+  arma::cube output;
+  c.Forward(input, output);
+
+  // For now, let the loss be the sum of all the output activations. Therefore,
+  // the upstream gradient is all ones.
+  arma::cube upstreamGradient(3, 4, 2, arma::fill::ones);
+
+  c.Backward(upstreamGradient);
+
+  arma::cube gradInput = c.getGradientWrtInput();
+
+  std::vector&lt;arma::cube&gt; gradFilters = c.getGradientWrtFilters();
+
+  // Now compute approximate gradients.
+  double disturbance = 0.5e-5;
+
+  output = arma::zeros(arma::size(output));
+  arma::cube approxGradientWrtInput(arma::size(input), arma::fill::zeros);
+  for (size_t i=0; i&lt;input.n_elem; i++)
+  {
+    input[i] += disturbance;
+    c.Forward(input, output);
+    double l1 = arma::accu(output);
+    input[i] -= 2*disturbance;
+    c.Forward(input, output);
+    double l2 = arma::accu(output);
+    approxGradientWrtInput[i] = (l1 - l2)/(2.0*disturbance);
+    input[i] += disturbance;
+  }
+
+  BOOST_REQUIRE(arma::approx_equal(gradInput,
+                                   approxGradientWrtInput,
+                                   "absdiff",
+                                   disturbance));
+
+  std::vector&lt;arma::cube&gt; approxGradientWrtFilters(2);
+  approxGradientWrtFilters[0] = arma::zeros(3, 5, 3);
+  approxGradientWrtFilters[1] = arma::zeros(3, 5, 3);
+
+  std::vector&lt;arma::cube&gt; filters = c.getFilters();
+
+  for (size_t fidx=0; fidx&lt;2; fidx++)
+  {
+    for (size_t idx=0; idx&lt;filters[fidx].n_elem; idx++)
+    {
+      filters[fidx][idx] += disturbance;
+      c.setFilters(filters);
+      c.Forward(input, output);
+      double l1 = arma::accu(output);
+      filters[fidx][idx] -= 2.0*disturbance;
+      c.setFilters(filters);
+      c.Forward(input, output);
+      double l2 = arma::accu(output);
+      approxGradientWrtFilters[fidx][idx] = (l1-l2)/(2.0*disturbance);
+      filters[fidx][idx] += disturbance;
+      c.setFilters(filters);
+    }
+  }
+
+  for (size_t fidx=0; fidx&lt;2; fidx++)
+    BOOST_REQUIRE(arma::approx_equal(gradFilters[fidx],
+                  approxGradientWrtFilters[fidx],
+                  "absdiff",
+                  disturbance));
+}</code></pre>
+<h3 style="text-align: justify;">4. Le Net</h3>
+<p style="text-align: justify;">What I realized - as I started assembling the pieces I'd written - was that while small modules may each work perfectly when they're isolated, they can raise a shit-storm when put together. For the longest time after I'd put together my Le Net, I was befuddled at why the network was deciding to output equal probabilities for all categories. I'd checked and rechecked the outputs of all the layers -- and everything was working as it should have in isolation, but put together, the network was completely useless. But I'm getting ahead of myself, let's start at the beginning:</p>
+<p style="text-align: justify;">Six days into working on the groundup implementation, I had implemented and tested all my layers - and was quite happy with my progress. I'd even written a small integration test where I trained a network on a synthetic dataset. Everything was good. I decided to make things prettier before I started on LeNet, so I made a bunch of style fixes, refactored everything and even wrote a CMake configuration. I also wrote a utility module for reading the challenge data into Armadillo data structures.</p>
+<p style="text-align: justify;">I wrote the Le Net implementation and tested it on a very small dataset. It seemed to work in one go, and so I thought that since everything is working fine, and since Le Net is such a popular neural network architecture, I might as well go ahead and train it on the entire challenge data. <strong>In retrospect, I made the following critical errors:</strong></p>
+
