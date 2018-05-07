@@ -20,9 +20,7 @@ published: true
 <h3 style="text-align: justify;">2. Forward and Backward</h3>
 <p style="text-align: justify;">I started right in the middle of everything - the convolution layer was the first thing I wanted to do. After a quick constructor implementation, I came to the Forward and Backward passes. The Forward pass was pretty straight-"forward"... See what I did there? <strong>There are several excellent explanations <a href="https://www.youtube.com/watch?v=bNb2fEVKeEo&amp;t=0s&amp;list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&amp;index=5">(one can be found here)</a> of the forward pass, and TBH it's not that tough to understand, so I won't go into it here.</strong> I'll just paste my code:</p>
 
-<p>
-``` c++
-void Forward(arma::cube& input, arma::cube& output)
+<pre class="language-cpp"><code>void Forward(arma::cube&amp; input, arma::cube&amp; output)
 {
   // The filter dimensions and strides must satisfy some contraints for
   // the convolution operation to be well defined.
@@ -35,10 +33,10 @@ void Forward(arma::cube& input, arma::cube& output)
                        numFilters);
 
   // Perform convolution for each filter.
-  for (size_t fidx = 0; fidx < numFilters; fidx++)
+  for (size_t fidx = 0; fidx &lt; numFilters; fidx++)
   {
-    for (size_t i=0; i <= inputHeight - filterHeight; i += verticalStride)
-      for (size_t j=0; j <= inputWidth - filterWidth; j += horizontalStride)
+    for (size_t i=0; i &lt;= inputHeight - filterHeight; i += verticalStride)
+      for (size_t j=0; j &lt;= inputWidth - filterWidth; j += horizontalStride)
         output((i/verticalStride), (j/horizontalStride), fidx) = arma::dot(
             arma::vectorise(
                 input.subcube(i, j, 0,
@@ -48,11 +46,9 @@ void Forward(arma::cube& input, arma::cube& output)
   }
   
   // Store the input and output. This will be needed by the backward pass.
-  this->input = input;
-  this->output = output;
-}
-```
-</p>
+  this-&gt;input = input;
+  this-&gt;output = output;
+}</code></pre>
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
