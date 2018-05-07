@@ -35,7 +35,7 @@ MathJax.Hub.Config({
 <p style="text-align: justify;">I started right in the middle of everything - the convolution layer was the first thing I wanted to do. After a quick constructor implementation, I came to the Forward and Backward passes. The Forward pass was pretty straight-"forward"... See what I did there? <strong>There are several excellent explanations <a href="https://www.youtube.com/watch?v=bNb2fEVKeEo&amp;t=0s&amp;list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&amp;index=5">(one can be found here)</a> of the forward pass, and TBH it's not that tough to understand, so I won't go into it here.</strong> I'll just paste my code:</p>
 
 ``` c++
-void Forward(arma::cube&amp; input, arma::cube&amp; output)
+void Forward(arma::cube& input, arma::cube& output)
 {
   // The filter dimensions and strides must satisfy some contraints for
   // the convolution operation to be well defined.
@@ -48,10 +48,10 @@ void Forward(arma::cube&amp; input, arma::cube&amp; output)
                        numFilters);
 
   // Perform convolution for each filter.
-  for (size_t fidx = 0; fidx &lt; numFilters; fidx++)
+  for (size_t fidx = 0; fidx < numFilters; fidx++)
   {
-    for (size_t i=0; i &lt;= inputHeight - filterHeight; i += verticalStride)
-      for (size_t j=0; j &lt;= inputWidth - filterWidth; j += horizontalStride)
+    for (size_t i=0; i <= inputHeight - filterHeight; i += verticalStride)
+      for (size_t j=0; j <= inputWidth - filterWidth; j += horizontalStride)
         output((i/verticalStride), (j/horizontalStride), fidx) = arma::dot(
             arma::vectorise(
                 input.subcube(i, j, 0,
@@ -59,10 +59,10 @@ void Forward(arma::cube&amp; input, arma::cube&amp; output)
               ),
             arma::vectorise(filters[fidx]));
   }
-  
+
   // Store the input and output. This will be needed by the backward pass.
-  this-&gt;input = input;
-  this-&gt;output = output;
+  this->input = input;
+  this->output = output;
 }
 ```
 
@@ -112,7 +112,9 @@ void Forward(arma::cube&amp; input, arma::cube&amp; output)
 
 
 ``` c++
-void Backward(arma::cube&amp; upstreamGradient)                                                                                                                                                                                                                                       {
+
+void Backward(arma::cube& upstreamGradient)
+{
   // Upstream gradient must have same dimensions as the output.
   assert(upstreamGradient.n_slices == numFilters);
   assert(upstreamGradient.n_rows == output.n_rows);
@@ -123,11 +125,11 @@ void Backward(arma::cube&amp; upstreamGradient)                                 
   gradInput = arma::zeros(arma::size(input));
 
   // Compute the gradient wrt input.
-  for (size_t sidx=0; sidx &lt; numFilters; sidx++)
+  for (size_t sidx=0; sidx < numFilters; sidx++)
   {
-    for (size_t r=0; r&lt;output.n_rows; r ++)
+    for (size_t r=0; r<output.n_rows; r ++)
     {
-      for (size_t c=0; c&lt;output.n_cols; c ++)
+      for (size_t c=0; c<output.n_cols; c ++)
       {
         arma::cube tmp(arma::size(input), arma::fill::zeros);
         tmp.subcube(r*verticalStride,
@@ -148,15 +150,15 @@ void Backward(arma::cube&amp; upstreamGradient)                                 
   // Initialize the gradient wrt filters.
   gradFilters.clear();
   gradFilters.resize(numFilters);
-  for (size_t i=0; i&lt;numFilters; i++)
+  for (size_t i=0; i<numFilters; i++)
     gradFilters[i] = arma::zeros(filterHeight, filterWidth, inputDepth);
 
   // Compute the gradient wrt filters.
-  for (size_t fidx=0; fidx&lt;numFilters; fidx++)
+  for (size_t fidx=0; fidx<numFilters; fidx++)
   {
-    for (size_t r=0; r&lt;output.n_rows; r ++)
+    for (size_t r=0; r<output.n_rows; r ++)
     {
-      for (size_t c=0; c&lt;output.n_cols; c ++)
+      for (size_t c=0; c<output.n_cols; c ++)
       {
         arma::cube tmp(arma::size(filters[fidx]), arma::fill::zeros);
         tmp = input.subcube(r*verticalStride,
@@ -171,9 +173,10 @@ void Backward(arma::cube&amp; upstreamGradient)                                 
   }
 
   // Update the accumulated gradient wrt filters.
-  for (size_t fidx=0; fidx&lt;numFilters; fidx++)
+  for (size_t fidx=0; fidx<numFilters; fidx++)
     accumulatedGradFilters[fidx] += gradFilters[fidx];
 }
+
 ```
 <h3>3. A Note on Gradient Checking</h3>
 <p style="text-align: justify;">With the convolution layer implementation out of the way, the remaining layers were relatively easy to implement. Maybe the max-pooling layer was a bit tricky - like the convolution layer, it also has the deceptive sliding-window operation. However, with the understanding gleaned from the convolution layer backward pass implementation - this did not pose too much of a hurdle. As I had decided at the very beginning of the project, I was going to test every single layer immediately after I'd written it. Although I didn't write unit tests very extensively, I did write enough of them to make sure that the layers worked correctly for my purposes (Ie. that of solving the digit recognizer challenge).</p>
@@ -183,6 +186,7 @@ void Backward(arma::cube&amp; upstreamGradient)                                 
 
 
 ``` c++
+
 BOOST_AUTO_TEST_CASE(BackwardPassBigTest)
 {
   // Input is 7 rows, 11 cols, and 3 slices.
@@ -209,14 +213,14 @@ BOOST_AUTO_TEST_CASE(BackwardPassBigTest)
 
   arma::cube gradInput = c.getGradientWrtInput();
 
-  std::vector&lt;arma::cube&gt; gradFilters = c.getGradientWrtFilters();
+  std::vector<arma::cube> gradFilters = c.getGradientWrtFilters();
 
   // Now compute approximate gradients.
   double disturbance = 0.5e-5;
 
   output = arma::zeros(arma::size(output));
   arma::cube approxGradientWrtInput(arma::size(input), arma::fill::zeros);
-  for (size_t i=0; i&lt;input.n_elem; i++)
+  for (size_t i=0; i<input.n_elem; i++)
   {
     input[i] += disturbance;
     c.Forward(input, output);
@@ -233,15 +237,15 @@ BOOST_AUTO_TEST_CASE(BackwardPassBigTest)
                                    "absdiff",
                                    disturbance));
 
-  std::vector&lt;arma::cube&gt; approxGradientWrtFilters(2);
+  std::vector<arma::cube> approxGradientWrtFilters(2);
   approxGradientWrtFilters[0] = arma::zeros(3, 5, 3);
   approxGradientWrtFilters[1] = arma::zeros(3, 5, 3);
 
-  std::vector&lt;arma::cube&gt; filters = c.getFilters();
+  std::vector<arma::cube> filters = c.getFilters();
 
-  for (size_t fidx=0; fidx&lt;2; fidx++)
+  for (size_t fidx=0; fidx<2; fidx++)
   {
-    for (size_t idx=0; idx&lt;filters[fidx].n_elem; idx++)
+    for (size_t idx=0; idx<filters[fidx].n_elem; idx++)
     {
       filters[fidx][idx] += disturbance;
       c.setFilters(filters);
@@ -257,12 +261,13 @@ BOOST_AUTO_TEST_CASE(BackwardPassBigTest)
     }
   }
 
-  for (size_t fidx=0; fidx&lt;2; fidx++)
+  for (size_t fidx=0; fidx<2; fidx++)
     BOOST_REQUIRE(arma::approx_equal(gradFilters[fidx],
                   approxGradientWrtFilters[fidx],
                   "absdiff",
                   disturbance));
 }
+
 ```
 <h3 style="text-align: justify;">4. Le Net</h3>
 <p style="text-align: justify;">What I realized - as I started assembling the pieces I'd written - was that while small modules may each work perfectly when they're isolated, they can raise a shit-storm when put together. For the longest time after I'd put together my Le Net, I was befuddled at why the network was deciding to output equal probabilities for all categories. I'd checked and rechecked the outputs of all the layers -- and everything was working as it should have in isolation, but put together, the network was completely useless. But I'm getting ahead of myself, let's start at the beginning:</p>
