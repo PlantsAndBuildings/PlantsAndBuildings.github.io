@@ -81,7 +81,7 @@ void Forward(arma::cube& input, arma::cube& output)
 
 <ol>
 <li style="text-align: justify;">Just a refresher, $ \nabla_y L = \begin{bmatrix} \frac{\partial L}{\partial y_1}\\ \frac{\partial L}{\partial y_2}\\ \frac{\partial L}{\partial y_3}\\ \frac{\partial L}{\partial y_4}\\ \frac{\partial L}{\partial y_5}\\ \frac{\partial L}{\partial y_6}\\ \end{bmatrix}$</li>
-<li style="text-align: justify;">Also, if it is not clear why this is already available when the backward pass reaches the convolution layer - consider this hastily made flowchart of forward and backward passes:<br /><img src="images/backprop.png" alt="" /></li>
+<li style="text-align: justify;">Also, if it is not clear why this is already available when the backward pass reaches the convolution layer - consider this hastily made flowchart of forward and backward passes:<br /><img src="{{ site.url }}/static/img/backprop.png" alt="" /></li>
 </ol>
 <p style="text-align: justify;">So, to leverage the math notation and state things concisely: <strong>we are given</strong> $ \nabla_y L $ <strong>and we must compute</strong> $ \nabla_x L $<strong> and</strong> $ \nabla_f L $<strong>.</strong> That doesn't seem too hard, does it? We can almost directly write out:</p>
 
