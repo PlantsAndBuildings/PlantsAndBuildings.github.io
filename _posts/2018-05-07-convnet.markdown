@@ -182,8 +182,8 @@ void Backward(arma::cube&amp; upstreamGradient)                                 
 
 
 
-
-<pre class="language-cpp"><code>BOOST_AUTO_TEST_CASE(BackwardPassBigTest)
+``` c++
+BOOST_AUTO_TEST_CASE(BackwardPassBigTest)
 {
   // Input is 7 rows, 11 cols, and 3 slices.
   arma::cube input(7, 11, 3, arma::fill::randn);
@@ -262,7 +262,8 @@ void Backward(arma::cube&amp; upstreamGradient)                                 
                   approxGradientWrtFilters[fidx],
                   "absdiff",
                   disturbance));
-}</code></pre>
+}
+```
 <h3 style="text-align: justify;">4. Le Net</h3>
 <p style="text-align: justify;">What I realized - as I started assembling the pieces I'd written - was that while small modules may each work perfectly when they're isolated, they can raise a shit-storm when put together. For the longest time after I'd put together my Le Net, I was befuddled at why the network was deciding to output equal probabilities for all categories. I'd checked and rechecked the outputs of all the layers -- and everything was working as it should have in isolation, but put together, the network was completely useless. But I'm getting ahead of myself, let's start at the beginning:</p>
 <p style="text-align: justify;">Six days into working on the groundup implementation, I had implemented and tested all my layers - and was quite happy with my progress. I'd even written a small integration test where I trained a network on a synthetic dataset. Everything was good. I decided to make things prettier before I started on LeNet, so I made a bunch of style fixes, refactored everything and even wrote a CMake configuration. I also wrote a utility module for reading the challenge data into Armadillo data structures.</p>
