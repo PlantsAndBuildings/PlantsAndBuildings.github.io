@@ -1,5 +1,5 @@
 ---
-title: Kaggle Digit Recognizer Challenge: A ground up C++ convnet that scores 0.973 on the leaderboard
+title: A ground-up C++ convnet that scores 0.973 on the Kaggle Digit Recognizer Challenge
 layout: post
 categories: [misc]
 published: true
