@@ -64,7 +64,7 @@ $$ \begin{bmatrix}x_1\\x_2\\x_3\\x_4\\x_5\\x_6\\x_7\\x_8\end{bmatrix} * \begin{b
 <p>Now, we know that the loss is a function of $$ y_1, y_2� ... y_6 $$. Ie.</p>
 <p>$$ L = L(y_1, y_2, y_3, y_4, y_5, y_6) $$</p>
 <p style="text-align: justify;">In the backpropagation step, we <strong>use the gradient of loss with respect to the layer outputs to compute the gradients of the loss with respect to the layer inputs</strong>. It should be clear why the gradient of loss with respect to the output is already available. Hence, when the backward pass reaches the convolution layer, we already have $$ \nabla_y L $$. Two minor notes:</p>
-
+<!--
 <ol>
 <li style="text-align: justify;">Just a refresher, $$ \nabla_y L = \begin{bmatrix} \frac{\partial L}{\partial y_1}\\ \frac{\partial L}{\partial y_2}\\ \frac{\partial L}{\partial y_3}\\ \frac{\partial L}{\partial y_4}\\ \frac{\partial L}{\partial y_5}\\ \frac{\partial L}{\partial y_6}\\ \end{bmatrix}$$</li>
 <li style="text-align: justify;">Also, if it is not clear why this is already available when the backward pass reaches the convolution layer - consider this hastily made flowchart of forward and backward passes:<br /><img src="images/backprop.png" alt="" /></li>
@@ -91,7 +91,7 @@ $$ \begin{bmatrix}x_1\\x_2\\x_3\\x_4\\x_5\\x_6\\x_7\\x_8\end{bmatrix} * \begin{b
 <p style="text-align: justify;">If you think about it long enough, you will find that the <strong>same exact intuition works for the gradient with respect to the input as well</strong>. Here is a hint:</p>
 <p style="text-align: justify;">$$ \nabla_x L = \sum_{i = 1}^{6}{(\text{affect of input values on the activation } y_i)(\text{affect } y_i \text{ has on } L)}$$</p>
 <p style="text-align: justify;">Okay, with that verbose explanation in place, I present my <strong>convolution layer backward pass</strong>:</p>
-
+-->
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
