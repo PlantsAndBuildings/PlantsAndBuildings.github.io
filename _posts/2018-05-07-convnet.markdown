@@ -66,3 +66,13 @@ $$ \begin{bmatrix}x_1\\x_2\\x_3\\x_4\\x_5\\x_6\\x_7\\x_8\end{bmatrix} * \begin{b
 <p>$$ L = L(y_1, y_2, y_3, y_4, y_5, y_6) $$</p>
 <p style="text-align: justify;">In the backpropagation step, we <strong>use the gradient of loss with respect to the layer outputs to compute the gradients of the loss with respect to the layer inputs</strong>. It should be clear why the gradient of loss with respect to the output is already available. Hence, when the backward pass reaches the convolution layer, we already have $ \nabla_y L $. Two minor notes:</p>
 
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<script type="text/javascript" async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
