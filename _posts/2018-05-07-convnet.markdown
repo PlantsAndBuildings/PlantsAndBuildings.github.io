@@ -20,6 +20,7 @@ published: true
 <h3 style="text-align: justify;">2. Forward and Backward</h3>
 <p style="text-align: justify;">I started right in the middle of everything - the convolution layer was the first thing I wanted to do. After a quick constructor implementation, I came to the Forward and Backward passes. The Forward pass was pretty straight-"forward"... See what I did there? <strong>There are several excellent explanations <a href="https://www.youtube.com/watch?v=bNb2fEVKeEo&amp;t=0s&amp;list=PL3FW7Lu3i5JvHM8ljYj-zLfQRF3EO8sYv&amp;index=5">(one can be found here)</a> of the forward pass, and TBH it's not that tough to understand, so I won't go into it here.</strong> I'll just paste my code:</p>
 
+<p>
 ``` c++
 void Forward(arma::cube& input, arma::cube& output)
 {
@@ -51,6 +52,7 @@ void Forward(arma::cube& input, arma::cube& output)
   this->output = output;
 }
 ```
+</p>
 <p style="text-align: justify;">The backward pass needed some effort. The reason for that requires a slight digression:</p>
 <p style="text-align: justify;">See, the issue with most texts on back-propagation (and ultimately most resources on neural networks that I've come across - <strong>with the notable exception of Andrej Karpathy's <a href="http://cs231n.stanford.edu/">CS231n</a></strong>) is that they explain things like gradients flowing backwards only in the context of dense layers. When I first started reading about backprop, I had this notion that it was a specialized mathematical technique developed by neural network scientists (?) to be applied only in the context of training neural networks - and that too fully connected feedforward networks. It is not that tough to grasp backpropagation in this context because all operations are dot products and sigmoid/softmax activations - and we all can calculate derivatives of these functions using high-school calculus. Then you find out about convnets and now you have this scary new operation called a convolution which involves a filter and sliding across an input - and it is certainly not intuitive how a gradient can be calculated. By the time one gets to reading about RNNs and LSTMs, they've given up all hope on trying to understand how the backward pass works. This ignorance is enabled, nay, encouraged by prebuilt, packaged, served-on-a-silver-platter layers the kind of which are provided by Keras, Caffe and jack-in-the-box deep learning framework.</p>
 <p style="text-align: justify;">The real trick to figuring out the backward pass through a convolution layer is that there is no trick. You just have to roll up your sleeves, clench your jaw, muster up all your grit and write it out on a piece of paper - atleast that's how I did it (perhaps to a less dramatic narration). <strong>Deriving backpropagation equations for any layer on your own, without looking up anything on the Internet is (atleast in my experience) a very fulfilling experience. It opened my eyes to how general the method is - that it can be applied in any context (not just neural nets) where gradients of highly composite functions are needed.</strong></p>
