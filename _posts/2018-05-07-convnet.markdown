@@ -51,6 +51,23 @@ void Forward(arma::cube& input, arma::cube& output)
   this->output = output;
 }
 ```
+<p style="text-align: justify;">The backward pass needed some effort. The reason for that requires a slight digression:</p>
+<p style="text-align: justify;">See, the issue with most texts on back-propagation (and ultimately most resources on neural networks that I've come across - <strong>with the notable exception of Andrej Karpathy's <a href="http://cs231n.stanford.edu/">CS231n</a></strong>) is that they explain things like gradients flowing backwards only in the context of dense layers. When I first started reading about backprop, I had this notion that it was a specialized mathematical technique developed by neural network scientists (?) to be applied only in the context of training neural networks - and that too fully connected feedforward networks. It is not that tough to grasp backpropagation in this context because all operations are dot products and sigmoid/softmax activations - and we all can calculate derivatives of these functions using high-school calculus. Then you find out about convnets and now you have this scary new operation called a convolution which involves a filter and sliding across an input - and it is certainly not intuitive how a gradient can be calculated. By the time one gets to reading about RNNs and LSTMs, they've given up all hope on trying to understand how the backward pass works. This ignorance is enabled, nay, encouraged by prebuilt, packaged, served-on-a-silver-platter layers the kind of which are provided by Keras, Caffe and jack-in-the-box deep learning framework.</p>
+<p style="text-align: justify;">The real trick to figuring out the backward pass through a convolution layer is that there is no trick. You just have to roll up your sleeves, clench your jaw, muster up all your grit and write it out on a piece of paper - atleast that's how I did it (perhaps to a less dramatic narration). <strong>Deriving backpropagation equations for any layer on your own, without looking up anything on the Internet is (atleast in my experience) a very fulfilling experience. It opened my eyes to how general the method is - that it can be applied in any context (not just neural nets) where gradients of highly composite functions are needed.</strong></p>
+<p style="text-align: justify;">Coming back to the Backward pass through a conv layer. <strong>Here is how I derived it</strong>:</p>
+<p>Consider first, the case of a linear input with linear filters. Suppose the input size is 8 which is being convolved with a filter of size 3.</p>
+
+<p>
+$$ \begin{bmatrix}x_1\\x_2\\x_3\\x_4\\x_5\\x_6\\x_7\\x_8\end{bmatrix} * \begin{bmatrix}f_1\\f_2\\f_3\end{bmatrix} = \begin{bmatrix} f_1 x_1 + f_2 x_2 + f_3 x_3\\f_1 x_2 + f_2 x_3 + f_3 x_4\\ f_1 x_3 + f_2 x_4 + f_3 x_5\\ f_1 x_4 + f_2 x_5 + f_3 x_6\\ f_1 x_5 + f_2 x_6 + f_3 x_7\\ f_1 x_6 + f_2 x_7 + f_3 x_8 \end{bmatrix} = \begin{bmatrix}y_1\\y_2\\y_3\\y_4\\y_5\\y_6\end{bmatrix} $$
+</p>
+
+<p>Now, we know that the loss is a function of $$ y_1, y_2� ... y_6 $$. Ie.</p>
+<p>$$ L = L(y_1, y_2, y_3, y_4, y_5, y_6) $$</p>
+<p style="text-align: justify;">In the backpropagation step, we <strong>use the gradient of loss with respect to the layer outputs to compute the gradients of the loss with respect to the layer inputs</strong>. It should be clear why the gradient of loss with respect to the output is already available. Hence, when the backward pass reaches the convolution layer, we already have $$ \nabla_y L $$. Two minor notes:</p>
+<ol>
+<li style="text-align: justify;">Just a refresher, $$ \nabla_y L = \begin{bmatrix} \frac{\partial L}{\partial y_1}\\ \frac{\partial L}{\partial y_2}\\ \frac{\partial L}{\partial y_3}\\ \frac{\partial L}{\partial y_4}\\ \frac{\partial L}{\partial y_5}\\ \frac{\partial L}{\partial y_6}\\ \end{bmatrix}$$</li>
+<li style="text-align: justify;">Also, if it is not clear why this is already available when the backward pass reaches the convolution layer - consider this hastily made flowchart of forward and backward passes:<br /><img src="images/backprop.png" alt="" /></li>
+</ol>
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
