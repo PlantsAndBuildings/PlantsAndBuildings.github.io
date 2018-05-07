@@ -1,3 +1,9 @@
+---
+title: Kaggle Digit Recognizer Challenge: A ground up C++ convnet that scores 0.973 on the leaderboard
+layout: post
+categories: [misc]
+published: true
+---
 <h3>0. A convnet, you say? In C++?! FROM SCRATCH??!!</h3>
 <p style="text-align: justify;">About a week ago, I was at work with absolutely nothing to do - even the office pool table was (is still) broken. If you subscribe to the creationist agenda, you might refer to what happened next as a divine calling. Being a Darwinist myself, I attribute it to mind numbing boredom crippling all rational thought processes. See, over the course of last week, I implemented a machine learning model - one that is notoriously hard to debug when things do not work - in, what perhaps is, the most unforgiving programming language known to man.</p>
 <p style="text-align: justify;"><strong>On 18<sup>th</sup> April 2018, I decided to implement a convolutional neural network</strong></p>
