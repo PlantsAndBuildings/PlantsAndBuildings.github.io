@@ -19,17 +19,17 @@ MathJax.Hub.Config({
 </script>
 
 <p style="text-align: justify;">
-  Guess who's at work again and has nothing better to do than stare at ceilings and write blog-posts that noone reads? I do have a nice Wodehouse novel in my bag that I'm dying to get at - but I guess my boss would rather see my nose stuck in a code screen than a Jeeves omnibus... I bet Jeeves would've had a solution to my conundrum. Anyway, here's the dealio.
+  Guess who's at work again and has nothing better to do than to stare at ceilings and write blog posts that noone reads? I do have a nice Wodehouse novel in my bag that I'm dying to get at - but I guess my boss would rather see my nose stuck in a code screen than a Jeeves omnibus... I bet Jeeves would've had a solution to my conundrum. Anyway, here's the dealio.
 </p>
 
 <p style="text-align: justify;">
-  I've been reading a bunch of papers and articles and such on object detection and semantic sengmentation - learning about the standard deep learning models used for these tasks. The segmentation task has particularly caputured my fancy, mainly because the results look really cool:
+  I've been reading a bunch of papers and articles and such on object detection and semantic sengmentation - learning about the standard deep learning models used for these tasks. The segmentation task has particularly captured my fancy, mainly because the results look really cool:
 </p>
 
 <!-- INSERT SEMANTIC SEGMENTATION RESULT HERE -->
   
 <p style="text-align: justify;">
-  One model - called the Fully Convolutional Network - has found mention all over the place in segmentation literature, and doesn't look overly complicated. Consequently, I've chosen to implement its simplest variant - FCN-8s. It's really simple to understand really, there are only three salient points that one needs to remember:
+  One model - called the Fully Convolutional Network - has found mention all over the place in segmentation literature, and doesn't look overly complicated. Consequently, I've chosen to implement its simplest variant - FCN-8s. It's really simple to understand, there are only three salient points that one needs to remember:
 </p>
 
 <ol>
