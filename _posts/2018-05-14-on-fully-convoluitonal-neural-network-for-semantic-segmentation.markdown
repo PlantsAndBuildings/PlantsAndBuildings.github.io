@@ -1,5 +1,5 @@
 ---
-title: On Fully Convolutional Neural Networks for Semantic Segmentation
+title: On Fully Convolutional Neural Network for Semantic Segmentation
 layout: post
 categories: [machine-learning, misc, math]
 
