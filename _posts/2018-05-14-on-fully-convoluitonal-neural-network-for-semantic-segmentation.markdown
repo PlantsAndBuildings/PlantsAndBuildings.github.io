@@ -57,7 +57,15 @@ MathJax.Hub.Config({
 </p>
 
 <ol>
-  <li style="text-align: justify">The original VGG-Net weights (made available by the original authors of VGG-Net) are in caffemodel format (because the guys at Oxford who wrote VGG-Net wrote it in Caffe). This needs to be converted into a formate amenable to Tensorflow.</li>
-  </ol>
+  <li style="text-align: justify;">The original VGG-Net weights (made available by the original authors of VGG-Net) are in caffemodel format (because the guys at Oxford who wrote VGG-Net wrote it in Caffe). This needs to be converted into a format amenable to Tensorflow.</li>
+  <li style="text-align: justify;">The original VGG-Net was trained to perform image classification on the ILSVRC challenge. Here we are using a different dataset and have a different application in mind. It will probably not be very easy to determine if the pretrained weights have been correctly loaded.</li>
+</ol>
 
+<p style="text-align: justify;">The first issue is resolved with some effort - and code written by others. First, we need the pretrained weights. K Simonyan and A Zisserman from the Visual Geometry Group at University of Oxford are the original authors of VGG-Net. They've kindly made the weights of a trained VGG-Net available on their group's webpage. Their original model was written in Caffe - and so, their model is made available as two files:</p>
 
+<ol>
+  <li style="text-align: justify;">A weights file that actually contains the weights and biases of the trained VGG-Net.</li>
+  <li style="text-align: justify;">A model definition file which precisely defines the model architecture.</li>
+</ol>
+
+<p style="text-align: justify;">I'm not exactly an expert on Caffe, but </p>
