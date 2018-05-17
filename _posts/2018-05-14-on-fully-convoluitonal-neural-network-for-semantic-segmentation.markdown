@@ -2,7 +2,7 @@
 title: On Fully Convolutional Neural Network for Semantic Segmentation
 layout: post
 categories: [machine-learning, misc, math]
-published: true
+published: false
 
 ---
 
