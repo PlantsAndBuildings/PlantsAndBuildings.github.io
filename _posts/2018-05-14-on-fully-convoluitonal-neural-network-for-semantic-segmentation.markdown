@@ -2,7 +2,7 @@
 title: On Fully Convolutional Neural Network for Semantic Segmentation
 layout: post
 categories: [machine-learning, misc, math]
-published: false
+published: true
 
 ---
 
@@ -69,4 +69,22 @@ MathJax.Hub.Config({
   <li style="text-align: justify;">A model definition file which precisely defines the model architecture.</li>
 </ol>
 
-<p style="text-align: justify;">I'm not exactly an expert on Caffe, but </p>
+<p style="text-align: justify;">There is a very nice utility called <a href="https://github.com/ethereon/caffe-tensorflow">caffe-tensorflow</a> which can be used to convert the model weights into native numpy format. Again, thanks to <a href="https://github.com/ethereon">ethereon</a> for making this open-source. I used that, with a <a href="https://github.com/ethereon/caffe-tensorflow/issues/39#issuecomment-225670914">slight modification</a> to the model definition file to obtain the weights in native numpy format.</p>
+
+```
+$ python convert.py --caffemodel ../VGG_ILSVRC_16_layers.caffemodel --data-output-path ../weights.dat --code-output-path ../model-def.py ../VGG_ILSVRC_16_layers_deploy.prototxt
+```
+
+<p style="text-align: justify;">The above command produces the weights binary file in weights.dat and a model definition python class in model-def.py. Now from a Python REPL, we can:</p>
+
+```
+>>> import numpy as np
+>>> params = np.load('../weights.dat')
+>>> params = np.reshape(params, (1,))[0]
+>>> params.keys()
+[u'conv5_1', u'fc6', u'conv5_3', u'fc7', u'fc8', u'conv5_2', u'conv4_1', u'conv4_2', u'conv4_3', u'conv3_3', u'conv3_2', u'conv3_1', u'conv1_1', u'conv1_2', u'conv2_2', u'conv2_1']
+```
+
+<p style="text-align: justify;">
+We have obtained a dict with layer wise weights. Now we must check if the weights are indeed correct. For this, we will need to write a VGG-Net model, load these weights and make some predictions on images.
+</p>
