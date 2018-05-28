@@ -26,6 +26,8 @@ published: true
 
 <p style="text-align:justify;">I've also initialized an empty git repository, but haven't created a remote just yet - I'll wait to push some commits before I do that. Next up, we start on the utils to read the dataset.</p>
 
+<hr/>
+
 <p style="text-align:justify;"><b>Around 19:00 Saturday.</b> Read Dataset.</p>
 
 <p style="text-align:justify;">Yeah, so this entry is actually being written on Monday. I've just completed the module that will read the dataset batch by batch - although most of it was already complete on Satruday. I didn't really feel like working on this yesterday, so I kinda slacked off - but I'm back at it today.</p>
@@ -68,7 +70,7 @@ def next_train_batch(self, batch_sz = 10):
 
 <p style="text-align:justify;">See how I'm returning a map objects instead of lists or numpy arrays? Isn't it beautiful? Let me start at the beginning. The complete dataset sizes up to approximately 1.5 GB (just the train set). It is obviously a very bad idea to load all of it into memory. Since we're going to be training our network in batches, we only really need to pull one batch into memory at a time. The dataset creators have kindly provided a file that contains the names of all the image files in the dataset (this, I will call as the "index file"). I've read the index file into a list (let us call this the "index list"). Every time the above method is called (Ie. a new batch is required), I sample a certain number of entries from the index list - which represent the new batch. I then read the image file corresponding to each entry and form a new batch. But here's the cool part:</p>
 
-<p style:"text-align:justify;">In Python 2.x, a call to map function returned a list. So, if I were using Python 2.x I would've been reading an entire batch of images into memory for every call to the above method. However, I'm using Python 3.6; where the map function returns an iterator object insted of a list. As a result, I'm returning iterator object. What this means is that the images won't acutally be read into memory till the time they are required. That is, till the time that something like:</p>
+<p style="text-align:justify;">In Python 2.x, a call to map function returned a list. So, if I were using Python 2.x I would've been reading an entire batch of images into memory for every call to the above method. However, I'm using Python 3.6; where the map function returns an iterator object insted of a list. As a result, I'm only returning an iterator object with each call to the above function. What this means is that the images won't acutally be read into memory till the time they are required. That is, till the time that something like:</p>
 
 ```python
 ddic = voc_reader.next_train_batch()
@@ -81,5 +83,7 @@ for img in batch:
 <p>happens.</p>
 
 <p style="text-align:justify;">With that nugget of Pythonic amazement out of the way, I think I'm ready now to begin with the convnet implementation.</p>
+
+<hr/>
 
 <p style="text-align:justify;"><b>15:12 Monday.</b> Convnet Implementation begins.</p>
