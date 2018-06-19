@@ -38,6 +38,8 @@ urls:
       url: /projects/
     - text: XML Feed
       url: /feed.xml
+    - text: CV
+      url: /cv.pdf
 
 url: "https://plantsandbuildings.github.io"
 baseurl: ""
