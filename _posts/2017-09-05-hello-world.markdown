@@ -2,7 +2,7 @@
 title: Hello, World!
 layout: post
 categories: [misc]
-published: true
+published: false
 ---
 
 I am a programmer, bookworm, heavy metal afficionado and occasional short story writer. This blog right here is my miniscule attempt to share all that with any person who can spare the time to read it.
