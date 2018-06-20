@@ -2,7 +2,7 @@
 
 title: Toy Fully Convolutional Network for Semantic Segmentation
 layout: post
-published: true
+published: false
 
 ---
 
