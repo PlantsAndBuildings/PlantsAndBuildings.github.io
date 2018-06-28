@@ -97,7 +97,7 @@ MathJax.Hub.Config({
 </p>
 
 <p style="text-align: justify">
-  I'll analyze each aspect of this walkthrough in greater detail, but first a small note on the dataset I've used. PASCAL-VOC 2012 is a very standard dataset used for training segmentation models. It contains $ ~1000 $ images of varying dimensions each in the training and testing sets. More information about the dataset can be found <a href="http://host.robots.ox.ac.uk/pascal/VOC/" target="_blank">here</a>.
+  I'll analyze each aspect of this walkthrough in greater detail, but first a small note on the dataset I've used. PASCAL-VOC 2012 is a very standard dataset used for training segmentation models. It contains $ \sim 1000 $ images of varying dimensions each in the training and testing sets. More information about the dataset can be found <a href="http://host.robots.ox.ac.uk/pascal/VOC/" target="_blank">here</a>.
 </p>
 
 <hr/>
