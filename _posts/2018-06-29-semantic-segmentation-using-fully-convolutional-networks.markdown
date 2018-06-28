@@ -45,10 +45,14 @@ MathJax.Hub.Config({
 <hr/>
 
 <p style="text-align: justify">
-  <b>Disclaimer: What follows is not a tutorial, they're my implementation notes. If you're looking for material on what FCNs are and such - then you probably don't stand to gain much from reading on. For that, I suggest going through the paper linked above. What follows is probably most useful to people who are either planning to or are in the midst of implementing an FCN themselves. My aim here is to talk about details that I only found after scouring the depths of the Internet for several torturous hours.</b>
+  <b>Disclaimer: What follows is not a tutorial, they're my implementation notes. If you're looking for material on what FCNs are and such - then you probably don't stand to gain much from reading on. For that, I suggest going through the paper linked above. What follows is probably most useful to people who are either planning to or are in the midst of implementing an FCN themselves. My aim here is to talk about details that revealed themselves to me only after several torturous hours of scouring the depths of the Internet.</b>
 </p>
 
 <hr/>
+
+<h4>
+  Structure of this post:
+</h4>
 
 <ul>
   <li><a href="#section1">What is Semantic Segmentation?</a></li>
@@ -60,6 +64,10 @@ MathJax.Hub.Config({
   <li><a href="#section7">Cropping and Skip Connections</a></li>
   <li><a href="#section8">Results</a></li>
 </ul>
+
+<p style="text-align: justify">
+  Not sure if reading this *really* long post is worth your time? Maybe jump to the <a href="#section8">results</a> section first, and then come back to the rest of it.
+</p>
 
 <hr/>
 
@@ -89,7 +97,7 @@ MathJax.Hub.Config({
 </p>
 
 <p style="text-align: justify">
-  I'll now  analyze each aspect of this walkthrough in greater detail.
+  I'll analyze each aspect of this walkthrough in greater detail, but first a small note on the dataset I've used. PASCAL-VOC 2012 is a very standard dataset used for training segmentation models. It contains $ ~1000 $ images of varying dimensions each in the training and testing sets. More information about the dataset can be found <a href="http://host.robots.ox.ac.uk/pascal/VOC/" target="_blank">here</a>.
 </p>
 
 <hr/>
@@ -98,7 +106,7 @@ MathJax.Hub.Config({
 
 <!-- Briefly introduce VGG Architecture -->
 <p style="text-align: justify">
-  VGG-Net is a CNN architecture originally presented by Simonyan and Zisserman for the ImageNet Classification Task 2014. AFAIK, it did not win first place that year but still went on to become a VERY popular model because of its simplicity. All five variants of VGG-Net presented in the original paper consist only of convolutional and dense layers. The FCN that I've implemented (and the one that is presented in the FCN paper) uses a pretrained VGG-16 for its initial layers. Before I proceed further, it would help to familiarize oneself with the VGG-16 architecture:
+  <a href="https://arxiv.org/pdf/1409.1556.pdf" target="_blank">VGG-Net</a> is a CNN architecture originally presented by Simonyan and Zisserman for the ImageNet Classification Task 2014. AFAIK, it did not win first place that year but still went on to become a VERY popular model because of its simplicity. All five variants of VGG-Net presented in the original paper consist only of convolutional and dense layers. The FCN that I've implemented (and the one that is presented in the FCN paper) uses a pretrained VGG-16 for its initial layers. Before I proceed further, it would help to familiarize oneself with the VGG-16 architecture:
 </p>
 
 <!-- Image of VGG architecture -->
@@ -111,12 +119,12 @@ MathJax.Hub.Config({
 
 <!-- How to obtain the model weights. Talk about caffe-tensorflow -->
 <p style="text-align: justify">
-  Coming to the more practical aspect of obtaining and using the trained VGG weights. Luckily for us, the authors of VGG-Net have kindly made their trained models publicly availble on their group's webpage. They've written and trained their model in Caffe; which poses a minor hurdle for those of us using Tensorflow. I say minor because we only need to go an extra step of using caffe-tensorflow to convert the caffe weights into numpy binary format.
+  Coming to the more practical aspect of obtaining and using the trained VGG weights. Luckily for us, the authors of VGG-Net have kindly made their trained models publicly availble on their <a href="http://www.robots.ox.ac.uk/~vgg/research/very_deep/" target="_blank">group's webpage</a>. They've written and trained their model in Caffe; which poses a minor hurdle for those of us using Tensorflow. I say minor because we only need to go an extra step of using <a href="https://github.com/ethereon/caffe-tensorflow" target="_blank">caffe-tensorflow</a> to convert the caffe weights into numpy binary format.
 </p>
 
 <!-- Talk about how training the VGG Net from scratch is not feasible for mere mortals -->
 <p style="text-align: justify">
-  I should note, at this point, that one might be tempted to not use the pretrained weights at all. I initially had the misconception that initializing with the VGG weights is not very important - that the network would learn the weights when I train it end-to-end. This, unfortunately, is not the case. Training the VGG-Net is not a single step process - it is trained in stages, and with increasingly difficult images. The pretrained VGG that we will take for granted in the remainder of this post is no small feat to achieve. It is critical that we have it in our FCN. I cannot harp on this enough: training a VGG from scratch is a sizeable task - one that took the authors weeks of training to complete - it is not to be underestimated.
+  I should note, at this point, that <b>one might be tempted to not use the pretrained weights at all</b>. I initially had the misconception that initializing with the VGG weights is not very important - that the network would learn the weights when I train it end-to-end. This, unfortunately, is not the case. <b>Training the VGG-Net is not a single step process - it is trained in stages, and with increasingly difficult images. The pretrained VGG that we will take for granted in the remainder of this post is no small feat to achieve. It is critical that we have it in our FCN</b>. I cannot harp on this enough: training a VGG from scratch is a sizeable task - one that took the authors weeks of training to complete - it is not to be underestimated.
 </p>
 
 <hr/>
@@ -125,11 +133,11 @@ MathJax.Hub.Config({
 
 <!-- Why is it needed? What purpose does it solve? -->
 <p style="text-align: justify">
-  Here's the deal with this. Dense layers face the limitation that their input must always have a fixed size. Images, as they go, can be of any size. That is, we may have images of different sizes within a training batch. Likewise, it is not necessary that the image we perform inference on should have dimensions same as any of the training images. Note that this issue of dense layers requiring fixed input size doesn't present with convolutional layers. The input to a convolutional layer can be of any size and the weights of the layer would still work and still give outputs. The VGG-16 architecture presented above has three fully connected (dense) layers at the very end (<code>fc1</code>, <code>fc2</code> and <code>fc3</code>) and we must take care of them if we are to build an FCN. As the name goes, "Fully Convolutional Networks" should only have convolutional layers. Hence, to accomodate the name, we must convert the dense layers to convolutional layers. There exists a beautiful way to go about this.
+  Here's the deal with this. <b>Dense layers face the limitation that their input must always have a fixed size. Images, as they go, can be of any size. That is, we may have images of different sizes within a training batch. Likewise, it is not necessary that the image we perform inference on should have dimensions same as any of the training images. Note that this issue of dense layers requiring fixed input size doesn't present with convolutional layers</b>. The input to a convolutional layer can be of any size and the weights of the layer would still work and still give outputs. The VGG-16 architecture presented above has three fully connected (dense) layers at the very end (<code>fc1</code>, <code>fc2</code> and <code>fc3</code>) and we must take care of them if we are to build an FCN. As the name goes, "Fully Convolutional Networks" should only have convolutional layers. Hence, to accomodate the name, <b>we must convert the dense VGG layers to convolutional layers</b>. There exists a beautiful way to go about this.
 </p>
 <!-- How to convert dense layers to conv layers -->
 <p style="text-align: justify">
-  Suppose we have a dense layer that requires $ HW $ input units and produces $ D $ outputs. Ie. the weight matrix has dimensions $ D \times HW $. This dense layer can be convolutionalized as follows: each row of the weight matrix can be reshaped into a filter of dimenstions $ H \times W $. Thus we end up with $ D $ filters of size $ H \times W $. Note that this convolutionalized layer can now take arbitrarily sized inputs (it is exactly the same as any other convolution layer). Also note that if the input to this layer is of size $ H \times W $, then it performs the exact same operation as the original dense layer. I find this quite intuitive and easy to understand, but perhaps a better explanation of this convolutionalization procedure is available in the notes of CS231n <a href="http://cs231n.github.io/convolutional-networks/#convert" target="_blank">here</a>. In code, this reshaping of fully-connected weights of VGG-16 looks something like this:
+  Suppose we have a dense layer that requires $ HW $ input units and produces $ D $ outputs. Ie. the weight matrix has dimensions $ D \times HW $. <b>This dense layer can be convolutionalized as follows: each row of the dense layer weight matrix can be reshaped into a filter of dimenstions $ H \times W $. Thus we end up with $ D $ filters of size $ H \times W $</b>. Note that this convolutionalized layer can now take arbitrarily sized inputs (it is exactly the same as any other convolution layer). Also note that if the input to this layer is of size $ H \times W $, then it performs the exact same operation as the original dense layer. I find this quite intuitive and easy to understand, but perhaps a better explanation of this convolutionalization procedure is available in the notes of CS231n <a href="http://cs231n.github.io/convolutional-networks/#convert" target="_blank">here</a>. In code, this reshaping of fully-connected weights of VGG-16 looks something like this:
 </p>
 
 ``` python
@@ -137,7 +145,7 @@ fc1_convolutionalized_filters = numpy.reshape(vgg_params['fc1']['weights'], [7, 
 ```
 
 <p style="text-align: justify">
-  How did I get the above line of code? Note that the original VGG-16 was trained for the ImageNet classification dataset - where each RGB image was of dimesions $ 224 \times 224 $. So, the input to <code>fc1</code> in the original VGG-16 would have been $ 7 \times 7 $. This is easy to work out from the following facts: the spatial resolution remains unchanged at convolutional layers on account of SAME padding, and the the spatial resolution reduces by factor of $ 2 $ at each pooling layer. There are five pooling layers between <code>conv1_1</code> and <code>fc1</code> and hence, the input to <code>fc1</code> would have the dimensions $ 224/2^5 \times 224/2^5 $ or $ 7 \times 7 $. Also since the last conv layer before <code>fc1</code> (ie. <code>conv5_3</code>) has $ 512 $ output channels, the input volume of <code>fc1</code> would also have $ 512 $ channels. All in all, in the original VGG architcture, <code>fc1</code> saw an input of dimensions $ 7 \times 7 \times 512 $ and gave $ 4096 $ outputs. That is, the weight matrix of layer <code>fc1</code> had $ 4096 $ rows and $ 25088 $ columns. Following the convolutionalization logic presented in the last paragraph, each row (of $ 25088 $ weights) can be reshaped into a filter of size $ 7 \times 7 \times 512 $ and we would hence end up with $ 4096 $ such filters. In Tensorflow, we are required to specify convolution layer weights in the format <code>[filter_height, filter_width, filter_depth, output_channels]</code>. Hence we simply reshape the VGG weights into the shape [$ 7 $, $ 7 $, $ 512 $, $ 4096 $]. Note that the bias terms can be used as they are:
+  How did I get the above line of code? Note that the original VGG-16 was trained for the ImageNet classification dataset - where each RGB image was of dimesions $ 224 \times 224 $. So, the input to <code>fc1</code> in the original VGG-16 would have been $ 7 \times 7 $. This is easy to work out from the following facts: <b>the spatial resolution remains unchanged at convolutional layers on account of SAME padding, and the the spatial resolution reduces by factor of $ 2 $ at each pooling layer</b>. It would be useful to remember these observations as they will be useful later in the post as well. There are five pooling layers between <code>conv1_1</code> and <code>fc1</code> and hence, the input to <code>fc1</code> would have the dimensions $ 224/2^5 \times 224/2^5 $ or $ 7 \times 7 $. Also since the last conv layer before <code>fc1</code> (ie. <code>conv5_3</code>) has $ 512 $ output channels, the input volume of <code>fc1</code> would also have $ 512 $ channels. All in all, in the original VGG architecture, <code>fc1</code> sees an input of dimensions $ 7 \times 7 \times 512 $ and gives $ 4096 $ outputs. That is, the weight matrix of layer <code>fc1</code> has $ 4096 $ rows and $ 25088 $ columns. Following the convolutionalization logic presented in the last paragraph, each row (of $ 25088 $ weights) can be reshaped into a filter of size $ 7 \times 7 \times 512 $ and we would hence end up with $ 4096 $ such filters. In Tensorflow, we are required to specify convolution layer weights in the format <code>[filter_height, filter_width, filter_depth, output_channels]</code>. Hence we simply reshape the VGG weights into the shape [$ 7 $, $ 7 $, $ 512 $, $ 4096 $]. Note that the bias terms can be used as they are:
 </p>
 
 ``` python
@@ -211,11 +219,11 @@ fc3 = \
 <img src="{{ site.url }}/static/img/fcn/fcn.jpg"/>
 
 <p style="text-align: justify">
-  First off, note how the fully connected layers from the VGG architecture have now become convolution layers. Also now we see the addition of three new kinds of layers: score layers, upsample layers and addition layers. In this section we will tackle score layers.
+  First off, note how the fully connected layers from the VGG architecture have now become convolution layers. Also now we see the addition of <b>three new kinds of layers: score layers, upsample layers and addition layers</b>. In this section we will tackle score layers.
 </p>
 
 <p style="text-align: justify">
-  Score layers are nothing but convolutional layers having kernel dimensions $ 1 \times 1 $ and $ 21 $ output channels. My (intuitive) understanding of the nomenclature is as follows:
+  <b>Score layers are nothing but convolutional layers having kernel dimensions $ 1 \times 1 $ and $ 21 $ output channels</b>. My (intuitive) understanding of the nomenclature is as follows:
 </p>
 
 <p style="text-align: justify">
@@ -224,7 +232,7 @@ fc3 = \
 
 <!-- Explain color maps -->
 <p style="text-align: justify">
-  Note that the output of our score layers will have dimesions $ H \times W \times 21 $. At each pixel location, we can obtain a class prediction by simply picking the argmax of all $ 21 $ scores at that location. However, this doesn't lead us to a very visually appealing representation of the segmentation. We would like to associate each each output class with a color, and hence we can map our $ H \times W $ class predictions to an $ H \times W $ image (like the segmented cat image presented at the very beginning of this post). Ie. we need a color map.
+  Note that the output of our score layers will have dimesions $ H \times W \times 21 $. At each pixel location, we can obtain a class prediction by simply picking the argmax of all $ 21 $ scores at that location. However, this doesn't lead us to a very visually appealing representation of the segmentation. <b>We would like to associate each each output class with a color, so that we can map our $ H \times W $ class predictions to an $ H \times W $ image (like the segmented cat image presented at the very beginning of this post)</b>. Ie. we need a color map.
 </p>
 
 <!-- Present MATLAB code for obtaining colors -->
@@ -269,11 +277,11 @@ cmap = cmap / 255;
 <h4 id="section6">Upsampling Layers</h4>
 
 <p style="text-align: justify">
-  The second new kind of layer we see in the FCN architecture are upsampling layers. Specifically, there are three of these: <code>upsample2</code> <code>upsample4</code> and <code>upsample32</code>. As one might expect from the name, upsampling layers increase the dimensions od the input that is provided to them by some factor. The way I've named each of my upsampling layers is: <code>upsampleXYZ</code>, where <code>XYZ</code> is the factor of upsampling wrt <b>the lowest dimesions that the input to the network is pooled to (Ie. the output of </b><code>pool5</code><b>).</b> So, if the output of <code>pool5</code> has spatial dimensions $ H \times W $, then the output of <code>upsample2</code> has dimensions $ 2H \times 2W $; the output of <code>upsample4</code> has dimesions $ 4H \times 4W $ and the output of <code>upsample32</code> has dimensions $ 32H \times 32W $.
+  The second new kind of layer we see in the FCN architecture are <b>upsampling layers</b>. Specifically, there are three of these: <code>upsample2</code> <code>upsample4</code> and <code>upsample32</code>. As one might expect from the name, upsampling layers increase the dimensions of the input that is provided to them by some factor. The way I've named each of my upsampling layers is: <code>upsampleXYZ</code>, where <code>XYZ</code> is the factor of upsampling wrt <b>the lowest dimesions that the input to the network is pooled to (Ie. the output of </b><code>pool5</code><b>).</b> So, if the output of <code>pool5</code> has spatial dimensions $ H \times W $, then the output of <code>upsample2</code> has dimensions $ 2H \times 2W $; the output of <code>upsample4</code> has dimesions $ 4H \times 4W $ and the output of <code>upsample32</code> has dimensions $ 32H \times 32W $.
 </p>
 
 <p style="text-align: justify">
-  The upsampling layers are just convolutional layers of a special kind. If you don't understand how I can state that so directly, please refer <a href="https://arxiv.org/abs/1603.07285">chapter 4 of this document</a> on convolution arithmetic. The FCN paper tells us to initialize the filters of the upsample layer with bilinear interpolation filters. It will take me a complete post to explain resampling and bilinear interpolation - I would refer the reader to <a href="http://warmspringwinds.github.io/tensorflow/tf-slim/2016/11/22/upsampling-and-image-segmentation-with-tensorflow-and-tf-slim/" target="_blank">this post on Daniil Pakhomov's blog</a>. I strongly encourage reading the post atleast three times word for word - it contains extremely valuable theory and practical information about resampling, specifically bilinear interpolation. I have adapted the code preented in Daniil's blog post to generate the filters and create my upsampling layers:
+  The upsampling layers are just convolutional layers of a special kind. If you don't understand how I can state that so directly, please refer <a href="https://arxiv.org/abs/1603.07285">chapter 4 of this document</a> on convolution arithmetic. The FCN paper tells us to initialize the filters of the upsample layer with bilinear interpolation filters. It will take me a complete post to explain resampling and bilinear interpolation - I would refer the reader to <a href="http://warmspringwinds.github.io/tensorflow/tf-slim/2016/11/22/upsampling-and-image-segmentation-with-tensorflow-and-tf-slim/" target="_blank">this post on Daniil Pakhomov's blog</a>. I strongly encourage reading the post atleast three times word for word - it contains extremely valuable theory and practical information about resampling, specifically bilinear interpolation. I have adapted the code presented in Daniil's blog post to generate the filters and create my upsampling layers:
 </p>
 
 <p>Method to generate the upsampling filters:</p>
@@ -320,7 +328,7 @@ net['upsample2'] = tf.nn.conv2d_transpose(
 <h4 id="section7">Cropping and Skip Connections</h4>
 
 <p style="text-align: justify">
-  Finally, the last "new" kind of layer in the FCN architecture is the addition layer (also called a fuse layer or skip connection). This layer takes in two input volumes and adds them elementwise. Note that an important prerequisite of this addition is that the dimensions of the two input volumes must exactly match. Now, since the pool layers follow the 'SAME' scheme of max-pooling they reduce an input of dimensions $ H \times W $ to an output of dimensions $ \lfloor (H+1)/2 \rfloor \times \lfloor (W+1)/2 \rfloor $. However, the upsample layer increases the dimensions of an input ($ H \times W $) to $ 2H \times 2W $ (when the upsampling factor is 2). It is not too hard to show from these two observations that the output of <code>upsample2</code> always has dimensions greater than or equal to the output of <code>pool4</code> (equivalently, the output of <code>score_pool4</code>). Empirically, suppose that the output  of <code>pool4</code> (input to <code>pool5</code>) has size $ 5 \times 5 $; then the output of <code>pool5</code> will be of size $ 3 \times 3 $. The upsampling (<code>upsample2</code>) would hence produce an output of $ 6 \times 6 $ (greater dimensions than the output of <code>pool4</code>). Thus, in order for us to create a fuse layer with <code>score_pool4</code> and <code>upsample2</code> as inputs, we must first crop <code>upsample2</code> to an appropriate size. I have implemented this cropping as follows:
+  Finally, the last "new" kind of layer in the FCN architecture is the <b>addition layer (also called a fuse layer or skip connection)</b>. This layer takes in two input volumes and adds them elementwise. Note that <b>an important prerequisite of this addition is that the dimensions of the two input volumes must exactly match</b>. Now, since the pool layers follow the 'SAME' scheme of max-pooling they reduce an input of dimensions $ H \times W $ to an output of dimensions $ \lfloor (H+1)/2 \rfloor \times \lfloor (W+1)/2 \rfloor $. However, the upsample layer increases the dimensions of an input ($ H \times W $) to $ 2H \times 2W $ (when the upsampling factor is 2). It is not too hard to show from these two observations that the output of <code>upsample2</code> always has dimensions greater than or equal to the output of <code>pool4</code> (equivalently, the output of <code>score_pool4</code>). Empirically, suppose that the output  of <code>pool4</code> (input to <code>pool5</code>) has size $ 5 \times 5 $; then the output of <code>pool5</code> will be of size $ 3 \times 3 $. The upsampling (<code>upsample2</code>) would hence produce an output of $ 6 \times 6 $ (greater dimensions than the output of <code>pool4</code>). <b>Thus, in order for us to create a fuse layer with <code>score_pool4</code> and <code>upsample2</code> as inputs, we must first crop <code>upsample2</code> to an appropriate size</b>. I have implemented this cropping as follows:
 </p>
 
 ``` python
@@ -354,7 +362,7 @@ net['fuse_pool4'] = tf.add(net['score_pool4'], net['cropped_upsample2'])
 ```
 
 <p style="text-align: justify">
-  A few minor notes about the above code. The method to initialize score layer parameters (<code>_get_score_layer_init_params</code>) initializes filter weights using the Xavier initialization scheme and the biases to zero. Also it should be noted that for the crop layer implementation to work, the batch size <b>must be fixed to one</b>. Finally, here I've only presented cropping of the <code>upsample2</code> output. The outputs of <code>upsample4</code> and <code>upsample32</code> must also be cropped to the sizes of <code>pool3</code> and the input image respectively.
+  A few minor notes about the above code. The method to initialize score layer parameters (<code>_get_score_layer_init_params</code>) initializes filter weights using the <b>Xavier initialization scheme</b> and the biases to zero. Also it should be noted that for the crop layer implementation to work, the batch size <b>must be fixed to one</b>. Finally, here I've only presented cropping of the <code>upsample2</code> output. <b>The outputs of </b><code>upsample4</code> <b>and</b> <code>upsample32</code> <b>must also be cropped to the sizes of</b> <code>pool3</code> <b>and the input image respectively</b>.
 </p>
 
 <hr/>
@@ -362,7 +370,13 @@ net['fuse_pool4'] = tf.add(net['score_pool4'], net['cropped_upsample2'])
 <h4 id="section8">Results</h4>
 
 <p style="text-align: justify">
-  Finally, the section that I've been holding my breath for! Without further ado, here they are:
+  The standard metric for evaluating segmentation performance is mean intersection over union. Ie. mean ratio of the number of correctly predicted pixels to  the total number of pixels (mean is computed over all the images in the test set). I haven't gone to the extent of computing this metric for my model - mainly because my aim, going into the project, was more to get a program to do something cool and something which produces visually gratifying results than to produce a model that achieves state of the art results. I suppose though (and this guess may be well off the mark), that with a fair amount of fine tuning, it is possible to reproduce (atleast to a very small margin of error) the results reported in the original paper. Besides, I feel like the implementation process has already shown me the large bulk of what the FCN paper had to offer - and sitting around now, hoping and praying to God that a particular hyperparameter setting pushes the mIOU metric up by a third decimal point is not (IMHO) the best use of my time.
+</p>
+
+<p> *mic drop* </p>
+
+<p style="text-align: justify">
+  Now for the moment we've all been holding our breaths for! Without further ado, here they are. Leftmost panel contains the original image, middle panel contains the ground truth segmentation and the rightmost panel contains the predicted segmentation.
 </p>
 
 {% for i in (1..10) %}
@@ -378,6 +392,7 @@ net['fuse_pool4'] = tf.add(net['score_pool4'], net['cropped_upsample2'])
     </div>
   </div>
 {% endfor %}
+
 
 <hr/>
 
