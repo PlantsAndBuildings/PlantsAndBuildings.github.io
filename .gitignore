@@ -4,4 +4,5 @@ _site*
 *backup/
 secret/*
 *swp
+*swo
 
