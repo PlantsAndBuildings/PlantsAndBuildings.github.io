@@ -30,14 +30,14 @@ permalink: /secret/happy-birthday-anoushka/
 		<div id="card-inside">
 			<div class="wrap">
 				<center><p class="animated infinite wobble" style="font-size: 1.3em"><b><u>Happy Birthday Anoushka!</u></b></p></center>
-					<p>I'm not good at saying this kind of stuff - it all just sounds really fake and insincere to me. And I really wanted to give you a nice gift... this isn't exactly it but I know that you're way too nice to call me out on it. Okay, can't put off the insincere sounding stuff any longer. Here goes...</p>
-					<p>You're an awesome person for listening to me whine about my shit everyday. I hope you had an great day today (I know that you did because I'm also whatsapping you right now, as I write this)<i class="em-svg em-blush"></i></p>
+					<p>I'm not good at saying this kind of stuff - it all just sounds really fake and insincere to me. But I really really wanted to give you a nice gift... this isn't exactly it but I know that you're way too nice to call me out on it. Okay, can't put off the insincere sounding stuff any longer. Here goes...</p>
+					<p>You're an awesome person for listening to me whine about my shit everyday. I hope you had a great day today (I know that you did because I'm also whatsapping you right now, as I write this)<i class="em-svg em-blush"></i></p>
 					<p>Here's what you're getting from me:</p>
                     <ul>
                     <li>This <a href="{{ site.url  }}/secret/happy-birthday-anoushka/omg-this-comic-though.pdf" target="_blank">stupid thing</a> that I thought would be cool.</li>
-                    <li>This <a href="{{ site.url  }}/secret/happy-birthday-anoushka">other stupid thing</a> that I thought would also be cool.</li>
+                    <li>This <a href="{{ site.url  }}/secret/happy-birthday-anoushka/rendezvous-contract.pdf" target="_blank">other stupid thing</a> that I thought would also be cool.</li>
                     </ul>
-                    <p class="signed" style="font-size: 0.8em"><u><b>Made With</b> <b> <i class="em-svg em-heart"></i></b><b> by </b> <b>PlantsAndBuildings</b></u></p>
+                    <p class="signed" style="font-size: 0.8em"><u><b>Made With</b> <b> <i class="em-svg em-heart"></i></b><b> by </b> <b>PlantsAndBuildings (that's my dev handle)</b></u></p>
 					</div>
 				</div>
 				<div id="card-front">
