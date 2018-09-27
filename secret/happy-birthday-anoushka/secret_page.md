@@ -29,16 +29,21 @@ permalink: /secret/happy-birthday-anoushka/
 	<div id="card">
 		<div id="card-inside">
 			<div class="wrap">
-				<center><p class="animated infinite wobble"><b><u>Happy Birthday Dad!</u></b></p></center>
-					<p> Hey, I don't have much words to say on the occasion and neither did I plan some huge suprises! I just wanted to
-						wish you a sweet and cherishing birthday and I did wanted to make it special, I did what I do the best - Code. &nbsp;<i class="em-svg em-blush"></i></p>
-						<p> You have been a fantastic support throughout, a great person and a father actually. You did the best job raising me and I am proud of that as I learnt a lot from you about life and stuff and I can go on
-						with the message and what you mean to me but due to code constaints - I won't! (Hahaha). Wishing you a very happy birthday. Cheers!</p><p class="signed"><u>Made With <b> <i class="em-svg em-heart"></i></b><b> By </b> <b>Siddhant</b></u></p>
+				<center><p class="animated infinite wobble" style="font-size: 1.3em"><b><u>Happy Birthday Anoushka!</u></b></p></center>
+					<p>I'm not good at saying this kind of stuff - it all just sounds really fake and insincere to me. And I really wanted to give you a nice gift... this isn't exactly it but I know that you're way too nice to call me out on it. Okay, can't put off the insincere sounding stuff any longer. Here goes...</p>
+					<p>You're an awesome person for listening to me whine about my shit everyday. I hope you had an great day today (I know that you did because I'm also whatsapping you right now, as I write this)<i class="em-svg em-blush"></i></p>
+					<p>Here's what you're getting from me:</p>
+                    <ul>
+                    <li>This <a href="{{ site.url  }}/secret/happy-birthday-anoushka/omg-this-comic-though.pdf" target="_blank">stupid thing</a> that I thought would be cool.</li>
+                    <li>This <a href="{{ site.url  }}/secret/happy-birthday-anoushka">other stupid thing</a> that I thought would also be cool.</li>
+                    </ul>
+                    <p class="signed" style="font-size: 0.8em"><u><b>Made With</b> <b> <i class="em-svg em-heart"></i></b><b> by </b> <b>PlantsAndBuildings</b></u></p>
 					</div>
 				</div>
 				<div id="card-front">
 					<div class="wrap">
-						<h1 class="animated infinite swing">Happiest Birthday!</h1>
+						<h1 class="animated infinite swing">You're<br>Dying!</h1>
+						<h2>slowly ... so yeah.</h2>
 						<div class="cake_and_velas">
 							<div class="velas">
 								<div class="fuego"></div>
@@ -55,9 +60,9 @@ permalink: /secret/happy-birthday-anoushka/
 					<div class="card-front_inside">
 						<br> <br> <br>
 						<div class="polaroid">
-							<div class="img" style="background-image: url('file.jpg')"></div>
+							<div class="img" style="background-image: url('anoushka.jpeg')"></div>
 						</div>
-						<div  data-balloon="I wanted to do something different than ppt's/collages this year and I knew I had to do something creative, so here is a polaroid photo effect (took me a ton of code/brainstorming to achieve that!) 😂" data-balloon-length="large" data-balloon-pos="up" data-balloon-visible></div>
+						<div  data-balloon="I was going to put up an ugly fucking photo of my face .. and you went and sent me this 😂. Thanks! You look amazing!" data-balloon-length="large" data-balloon-pos="up" data-balloon-visible></div>
 					</div>
 					<div class="shadow"></div>
 				</div>
