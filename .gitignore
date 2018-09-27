@@ -2,7 +2,6 @@ _site*
 .sass-cache
 .jekyll-metadata
 *backup/
-secret/*
 *swp
 *swo
 
